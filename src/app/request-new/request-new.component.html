@@ -1,0 +1,61 @@
+<div class="new-request-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>ახალი მოთხოვნა</h1>
+      <p class="page-subtitle">აირჩიეთ კატეგორია</p>
+    </div>
+
+    <div class="category-section">
+      <h2>მოთხოვნის კატეგორია</h2>
+      <p class="section-description">აირჩიეთ კატეგორია, რომელიც შეესაბამება თქვენს მოთხოვნას</p>
+
+      <div class="categories-grid">
+        <button 
+          *ngFor="let category of categories"
+          class="category-card" 
+          type="button" 
+          (click)="selectCategory(category.name)">
+          <div class="category-icon">
+            <!-- Computer Icon -->
+            <svg *ngIf="category.icon === 'computer'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="14" x="2" y="3" rx="2"/>
+              <line x1="8" x2="16" y1="21" y2="21"/>
+              <line x1="12" x2="12" y1="17" y2="21"/>
+            </svg>
+            <!-- Printer Icon -->
+            <svg *ngIf="category.icon === 'printer'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"/>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+              <rect width="12" height="8" x="6" y="14"/>
+            </svg>
+            <!-- Network Icon -->
+            <svg *ngIf="category.icon === 'network'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h.01"/>
+              <path d="M8.5 16.429a5 5 0 0 1 7 0"/>
+              <path d="M5 12.859a10 10 0 0 1 14 0"/>
+              <path d="M1.42 9.28a15 15 0 0 1 21.16 0"/>
+            </svg>
+            <!-- Software Icon -->
+            <svg *ngIf="category.icon === 'software'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <path d="M7 7h10"/>
+              <path d="M7 12h10"/>
+              <path d="M7 17h6"/>
+            </svg>
+            <!-- Phone Icon -->
+            <svg *ngIf="category.icon === 'phone'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <!-- Other Icon -->
+            <svg *ngIf="category.icon === 'other'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"/>
+              <circle cx="19" cy="12" r="1"/>
+              <circle cx="5" cy="12" r="1"/>
+            </svg>
+          </div>
+          <span class="category-name">{{ category.name }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

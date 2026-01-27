@@ -1,0 +1,248 @@
+<div class="requests-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1>მოთხოვნები</h1>
+        <p class="page-subtitle">თქვენი მოთხოვნების მართვა</p>
+      </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="controls-bar">
+      <div class="search-box">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="ძიება..." 
+          (input)="onSearchChange($event)"
+          class="search-input"
+        />
+      </div>
+
+      <div class="filter-dropdown">
+        <button class="filter-btn" (click)="toggleStatusDropdown()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+          </svg>
+          {{ getSelectedStatusLabel() }}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        <div class="status-dropdown-menu" *ngIf="statusDropdownOpen">
+          <button 
+            *ngFor="let status of statusOptions"
+            class="status-dropdown-item"
+            [class.selected]="selectedStatusFilter === status.id"
+            (click)="selectStatus(status.id)">
+            <span>{{ status.label }}</span>
+            <svg *ngIf="selectedStatusFilter === status.id" class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="new-request-btn" (click)="createNewRequest()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        ახალი მოთხოვნა
+      </button>
+    </div>
+
+    <!-- Requests Table -->
+    <div class="table-container">
+      <table class="requests-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>კატეგორია</th>
+            <th>აღწერა</th>
+            <th>თარიღი</th>
+            <th>სტატუსი</th>
+            <th>მოქმედება</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let request of paginatedRequests" class="table-row">
+            <td><strong>#{{ formatRequestId(request.requestID) }}</strong></td>
+            <td>
+              <div>
+                <div class="category-name">{{ request.category }}</div>
+                <div class="subtext">{{ request.subcategory }}</div>
+              </div>
+            </td>
+            <td><div class="truncate">{{ request.description }}</div></td>
+            <td class="date-cell">{{ request.createdAt }}</td>
+            <td>
+              <span class="status" [ngClass]="getStatusClass(request.statusID)">
+                {{ getStatusLabel(request.statusID) }}
+              </span>
+            </td>
+            <td>
+              <div class="actions">
+                <button *ngIf="canEditRequest(request.statusID)" class="icon-btn edit-btn" (click)="openEditModal(request)" title="რედაქტირება">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                  </svg>
+                </button>
+                <button class="icon-btn" (click)="viewRequest(request.requestID)" title="ნახვა">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredRequests.length === 0">
+            <td colspan="6" class="empty-state">
+              <div class="empty-message">
+                <p>მოთხოვნები არ მოიძებნა</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="filteredRequests.length > 0">
+      <div class="pagination-info">
+        <span class="results-text">{{ startIndex }}-{{ endIndex }} of {{ filteredRequests.length }}</span>
+      </div>
+      
+      <div class="pagination-controls">
+        <button 
+          class="pagination-btn" 
+          (click)="previousPage()" 
+          [disabled]="currentPage === 1"
+          title="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+
+        <div class="pagination-pages">
+          <button 
+            *ngFor="let page of pages"
+            class="pagination-page"
+            [class.active]="currentPage === page"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </div>
+
+        <button 
+          class="pagination-btn" 
+          (click)="nextPage()" 
+          [disabled]="currentPage === totalPages"
+          title="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-backdrop" *ngIf="editModalOpen" (click)="closeEditModal()">
+    <div class="edit-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>მოთხოვნა #{{ formatRequestId(selectedRequest?.requestID) }}</h2>
+        <button class="close-btn" (click)="closeEditModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-content" *ngIf="selectedRequest">
+        <!-- Upper Section - Overview -->
+        <div class="overview-section">
+          <div class="overview-grid">
+            <div class="overview-item">
+              <label>კატეგორია / კატეგორიის ტიპი</label>
+              <div class="category-info">
+                <span class="category-badge">{{ selectedRequest.category }}</span>
+                <span class="category-separator">›</span>
+                <span class="subcategory-text">{{ selectedRequest.subcategory }}</span>
+              </div>
+            </div>
+
+            <div class="overview-item">
+              <label>სტატუსი</label>
+              <span class="status" [ngClass]="getStatusClass(selectedRequest.statusID)">
+                {{ getStatusLabel(selectedRequest.statusID) }}
+              </span>
+            </div>
+
+            <div class="overview-item">
+              <label>თარიღი</label>
+              <p>{{ selectedRequest.createdAt }}</p>
+            </div>
+
+            <div class="overview-item">
+              <label>შემვსები</label>
+              <p>{{ selectedRequest.initiatorName }}</p>
+            </div>
+
+            <div class="overview-item full-width">
+              <label>აღწერა</label>
+              <div class="description-box">{{ selectedRequest.description }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lower Section - Edit Form -->
+        <div class="edit-section">
+          <h3>მოთხოვნის განახლება</h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>შემსრულებელი</label>
+              <select [(ngModel)]="selectedExecutorId" class="form-select">
+                <option [ngValue]="null">აირჩიეთ შემსრულებელი</option>
+                <option *ngFor="let executor of executors" [ngValue]="executor.id">
+                  {{ executor.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>სტატუსი *</label>
+              <select [(ngModel)]="selectedStatusId" class="form-select" required>
+                <option *ngFor="let status of editStatusOptions" [ngValue]="status.id">
+                  {{ status.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>კომენტარი</label>
+            <textarea 
+              [(ngModel)]="editComment" 
+              class="form-textarea" 
+              placeholder="დაამატეთ დეტალები...">
+            </textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-cancel" (click)="closeEditModal()">გაუქმება</button>
+          <button class="btn-save" (click)="saveRequestUpdate()">შენახვა</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

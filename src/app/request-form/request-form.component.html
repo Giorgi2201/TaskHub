@@ -1,0 +1,112 @@
+<div class="form-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>ახალი მოთხოვნა</h1>
+      <p class="page-subtitle">{{ categoryName }}</p>
+    </div>
+
+    <button class="back-btn" type="button" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+      უკან დაბრუნება
+    </button>
+
+    <form class="request-form" (submit)="submitRequest($event)">
+      <!-- მოთხოვნის დეტალები -->
+      <div class="form-section">
+        <h2>მოთხოვნის დეტალები</h2>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label>დროებითი ნომერი</label>
+            <input type="text" [value]="requestNumber" disabled />
+          </div>
+
+          <div class="form-field">
+            <label>თარიღი</label>
+            <input type="text" [value]="currentDate" disabled />
+          </div>
+
+          <div class="form-field">
+            <label>კატეგორია</label>
+            <input type="text" [value]="categoryName" disabled />
+          </div>
+
+          <div class="form-field">
+            <label>ქვეკატეგორია <span class="required">*</span></label>
+            <select (change)="onSubcategoryChange($event)" [value]="selectedSubcategory">
+              <option value="" disabled selected>აირჩიეთ ქვეკატეგორია</option>
+              <option *ngFor="let sub of subcategories" [value]="sub">{{ sub }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ინიციატორის მონაცემები -->
+      <div class="form-section">
+        <h2>ინიციატორის მონაცემები</h2>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>სახელი, გვარი</label>
+            <input type="text" [value]="initiatorName" disabled />
+          </div>
+          <div class="form-field">
+            <label>თანამდებობა</label>
+            <input type="text" [value]="initiatorTitle" disabled />
+          </div>
+          <div class="form-field">
+            <label>სტრუქტურული ერთეული</label>
+            <input type="text" [value]="initiatorDepartment" disabled />
+          </div>
+          <div class="form-field">
+            <label>ელ. ფოსტა</label>
+            <input type="email" [value]="initiatorEmail" disabled />
+          </div>
+          <div class="form-field">
+            <label>ტელეფონი</label>
+            <input type="tel" [value]="initiatorPhone" disabled />
+          </div>
+        </div>
+      </div>
+
+      <!-- მოთხოვნის აღწერა -->
+      <div class="form-section">
+        <h2>მოთხოვნის აღწერა</h2>
+
+        <div class="form-field">
+          <label>აღწერა <span class="required">*</span></label>
+          <textarea rows="6" placeholder="დეტალურად აღწერეთ თქვენი მოთხოვნა..." 
+            (input)="onDescriptionChange($event)" [value]="description"></textarea>
+        </div>
+
+        <!-- Warning Message Block (Fixed) -->
+        <div class="warning-box" *ngIf="showWarning">
+          <div class="warning-icon">⚠️</div>
+          <div class="warning-content">
+            <div class="warning-title">შეცდომა</div>
+            <div class="warning-text">{{ warningMessage }}</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-icon">⏱️</div>
+          <div class="info-content">
+            <div class="info-title">ავტომატური სტატუსი</div>
+            <div class="info-text">
+              შენახვის შემდეგ მოთხოვნას ავტომატურად მიენიჭება სტატუსი: <strong>დამტკიცების მოლოდინში</strong>.
+            </div>
+          </div>
+        </div>
+
+        <button class="submit-btn" type="submit" [disabled]="isSubmitting">
+          <svg *ngIf="!isSubmitting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+          </svg>
+          <span *ngIf="isSubmitting">იგზავნება...</span>
+          <span *ngIf="!isSubmitting">გაგზავნა ხელმძღვანელთან</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

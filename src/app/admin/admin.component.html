@@ -1,0 +1,287 @@
+<div class="admin-container" *ngIf="isAdmin">
+  <div class="admin-header">
+    <h1 class="page-title">ადმინისტრირება</h1>
+    <p class="page-subtitle">სისტემის მართვა</p>
+  </div>
+
+  <div class="admin-content">
+    <div class="tab-switch">
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'users'"
+        (click)="activeTab = 'users'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        მომხმარებლები
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'news'"
+        (click)="activeTab = 'news'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+          <line x1="16" x2="16" y1="2" y2="6"/>
+          <line x1="8" x2="8" y1="2" y2="6"/>
+          <line x1="3" x2="21" y1="10" y2="10"/>
+        </svg>
+        სიახლეები
+      </button>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'users'">
+      <div class="content-panel">
+        <div class="panel-header">
+          <div class="panel-title-section">
+            <h2 class="panel-title">მომხმარებლების მართვა</h2>
+            <p class="panel-subtitle">სულ: {{ users.length }} მომხმარებელი</p>
+          </div>
+          <button class="btn-primary" (click)="openAddModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            ახალი მომხმარებელი
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>სახელი, გვარი</th>
+                <th>თანამდებობა</th>
+                <th>სტრუქტურული ერთეული</th>
+                <th>ელ-ფოსტა</th>
+                <th>როლი</th>
+                <th>მოქმედება</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of users">
+                <td class="user-name-cell">{{ user.name }}</td>
+                <td>{{ user.title }}</td>
+                <td>{{ user.department }}</td>
+                <td class="email-cell">{{ user.email }}</td>
+                <td>
+                  <span class="role-badge" [ngClass]="getRoleClass(user.role)">
+                    {{ user.role }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button class="action-btn edit-btn" (click)="openEditModal(user)" title="რედაქტირება">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button class="action-btn delete-btn" (click)="deleteUser(user.userID)" title="წაშლა">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'news'">
+      <div class="content-panel">
+        <div class="panel-header">
+          <div class="panel-title-section">
+            <h2 class="panel-title">სიახლეების მართვა</h2>
+            <p class="panel-subtitle">სულ: {{ news.length }} სიახლე</p>
+          </div>
+          <button class="btn-primary" (click)="openAddNewsModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14"/>
+              <path d="M5 12h14"/>
+            </svg>
+            სიახლის დამატება
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>სათაური</th>
+                <th>შინაარსი</th>
+                <th>ავტორი</th>
+                <th>თარიღი</th>
+                <th>მოქმედება</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let newsItem of news">
+                <td class="user-name-cell">{{ newsItem.title }}</td>
+                <td class="news-content-cell">{{ newsItem.content }}</td>
+                <td>{{ newsItem.authorName }}</td>
+                <td>{{ newsItem.createdAt }}</td>
+                <td class="actions-cell">
+                  <button class="action-btn edit-btn" (click)="openEditNewsModal(newsItem)" title="რედაქტირება">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button class="action-btn delete-btn" (click)="deleteNews(newsItem.newsID)" title="წაშლა">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Add/Edit User Modal -->
+<div class="modal-backdrop" *ngIf="modalOpen && activeTab === 'users'" (click)="closeModal()"></div>
+<div class="modal" *ngIf="modalOpen && activeTab === 'users'">
+  <div class="modal-header">
+    <h2 class="modal-title">{{ isEditMode ? 'მომხმარებლის რედაქტირება' : 'ახალი მომხმარებელი' }}</h2>
+    <button class="modal-close" (click)="closeModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="name">სახელი, გვარი</label>
+      <input 
+        type="text" 
+        id="name" 
+        [(ngModel)]="formData.name" 
+        placeholder="მაგ: გიორგი მაისურაძე"
+        class="form-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="title">თანამდებობა</label>
+      <input 
+        type="text" 
+        id="title" 
+        [(ngModel)]="formData.title" 
+        placeholder="მაგ: პროექტის მენეჯერი"
+        class="form-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="department">სტრუქტურული ერთეული</label>
+      <input 
+        type="text" 
+        id="department" 
+        [(ngModel)]="formData.department" 
+        placeholder="მაგ: IT დეპარტამენტი"
+        class="form-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="email">ელ-ფოსტა</label>
+      <input 
+        type="email" 
+        id="email" 
+        [(ngModel)]="formData.email" 
+        placeholder="მაგ: g.maisuradze@railway.ge"
+        class="form-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="role">როლი</label>
+      <select 
+        id="role" 
+        [(ngModel)]="formData.role" 
+        class="form-select"
+      >
+        <option value="">აირჩიეთ როლი</option>
+        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-secondary" (click)="closeModal()">გაუქმება</button>
+    <button class="btn-primary" (click)="saveUser()">
+      {{ isEditMode ? 'შენახვა' : 'დამატება' }}
+    </button>
+  </div>
+</div>
+
+<!-- Add/Edit News Modal -->
+<div class="modal-backdrop" *ngIf="modalOpen && activeTab === 'news'" (click)="closeModal()"></div>
+<div class="modal" *ngIf="modalOpen && activeTab === 'news'">
+  <div class="modal-header">
+    <h2 class="modal-title">{{ isEditMode ? 'სიახლის რედაქტირება' : 'სიახლის დამატება' }}</h2>
+    <button class="modal-close" (click)="closeModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="newsTitle">სათაური</label>
+      <input 
+        type="text" 
+        id="newsTitle" 
+        [(ngModel)]="newsFormData.title" 
+        placeholder="შეიყვანეთ სიახლის სათაური"
+        class="form-input"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="newsContent">შინაარსი</label>
+      <textarea 
+        id="newsContent" 
+        [(ngModel)]="newsFormData.content" 
+        placeholder="შეიყვანეთ სიახლის ტექსტი"
+        class="form-textarea"
+        rows="5"
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="newsImageUrl">სურათის URL (არასავალდებულო)</label>
+      <input 
+        type="text" 
+        id="newsImageUrl" 
+        [(ngModel)]="newsFormData.imageUrl" 
+        placeholder="https://example.com/image.jpg"
+        class="form-input"
+      />
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-secondary" (click)="closeModal()">გაუქმება</button>
+    <button class="btn-primary" (click)="saveNews()">
+      {{ isEditMode ? 'შენახვა' : 'დამატება' }}
+    </button>
+  </div>
+</div>

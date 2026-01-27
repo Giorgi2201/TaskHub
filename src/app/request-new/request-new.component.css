@@ -1,0 +1,121 @@
+.new-request-page {
+  min-height: 100vh;
+  background: hsl(var(--background));
+  padding: 24px 0 48px;
+  animation: fadeIn 0.3s ease;
+}
+
+.page-header {
+  margin-bottom: 40px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+}
+
+.page-subtitle {
+  margin: 6px 0 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+}
+
+.category-section {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / .50);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--shadow-card);
+  animation: slideIn 0.3s ease;
+}
+
+.category-section h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.section-description {
+  margin: 0 0 32px;
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .categories-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 24px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-card:hover {
+  background: hsl(var(--accent) / .30);
+  border-color: hsl(var(--primary) / .40);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px hsl(220 25% 12% / .08);
+}
+
+.category-card:active {
+  transform: translateY(0);
+}
+
+.category-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: hsl(var(--muted) / .50);
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.category-card:hover .category-icon {
+  background: hsl(var(--primary) / .15);
+}
+
+.category-icon svg {
+  width: 32px;
+  height: 32px;
+  color: hsl(var(--foreground) / .70);
+  transition: color 0.2s ease;
+}
+
+.category-card:hover .category-icon svg {
+  color: hsl(var(--primary));
+}
+
+.category-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  text-align: center;
+  line-height: 1.4;
+}
+

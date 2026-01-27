@@ -1,4 +1,4 @@
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # Compiled output
 /dist
@@ -6,10 +6,8 @@
 /out-tsc
 /bazel-out
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# Node modules
+node_modules
 
 # IDEs and editors
 .idea/
@@ -40,3 +38,13 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Backend .NET
+TaskHub.API/bin/
+TaskHub.API/obj/
+TaskHub.API/*.user
+TaskHub.API/*.suo
+TaskHub.API/.vs/
+*.db
+*.db-shm
+*.db-wal

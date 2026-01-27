@@ -1,0 +1,102 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="3" width="16" height="16" rx="2"></rect>
+          <path d="M4 11h16"></path>
+          <path d="M12 3v8"></path>
+          <path d="m8 19-2 3"></path>
+          <path d="m18 22-2-3"></path>
+        </svg>
+      </div>
+      <h1>TaskHub</h1>
+      <p>საქართველოს რკინიგზა</p>
+    </div>
+
+    <div class="login-panel">
+      <h2>სისტემაში შესვლა</h2>
+      
+      <form (ngSubmit)="login()">
+        <div class="form-group">
+          <label for="email">ელ-ფოსტა</label>
+          <input 
+            type="email" 
+            id="email" 
+            [(ngModel)]="email" 
+            name="email"
+            placeholder="user@railway.ge"
+            class="form-input"
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">პაროლი</label>
+          <input 
+            type="password" 
+            id="password" 
+            [(ngModel)]="password" 
+            name="password"
+            placeholder="••••••••"
+            class="form-input"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <div class="error-message" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+        <button type="submit" class="btn-login">შესვლა</button>
+      </form>
+    </div>
+
+    <div class="demo-hint">
+      <button class="btn-demo-toggle" (click)="toggleDemoPanel()" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 16v-4"/>
+          <path d="M12 8h.01"/>
+        </svg>
+        დემო რეჟიმი - ყველა მომხმარებლის მონაცემების ნახვა
+      </button>
+    </div>
+  </div>
+
+  <div class="demo-panel" [class.open]="showDemoPanel">
+    <div class="demo-panel-header">
+      <h3>დემო რეჟიმი - შესვლის მონაცემები</h3>
+      <button class="btn-close" (click)="toggleDemoPanel()" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="demo-panel-content">
+      <p class="demo-note">დააკლიკეთ ნებისმიერ მომხმარებელზე ველების ავტომატური შევსებისთვის</p>
+      <div class="demo-users">
+        <div 
+          *ngFor="let user of demoUsers" 
+          class="demo-user"
+          (click)="useDemoCredentials(user)">
+          <div class="demo-user-header">
+            <span class="demo-user-name">{{ user.name }}</span>
+            <span class="role-badge" [ngClass]="getRoleClass(user.role)">{{ user.role }}</span>
+          </div>
+          <div class="demo-user-details">
+            <div class="demo-field">
+              <span class="demo-label">ელ-ფოსტა:</span>
+              <span class="demo-value">{{ user.email }}</span>
+            </div>
+            <div class="demo-field">
+              <span class="demo-label">პაროლი:</span>
+              <span class="demo-value password">{{ user.password }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

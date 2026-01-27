@@ -1,0 +1,126 @@
+<div class="news-container">
+  <div class="news-header">
+    <div class="header-content">
+      <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+        <line x1="16" x2="16" y1="2" y2="6"/>
+        <line x1="8" x2="8" y1="2" y2="6"/>
+        <line x1="3" x2="21" y1="10" y2="10"/>
+      </svg>
+      <div>
+        <h1 class="page-title">სიახლეები</h1>
+        <p class="page-subtitle">აქტუალური ინფორმაცია და განახლებები</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-content" *ngIf="!loading">
+    <div class="news-empty" *ngIf="news.length === 0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" x2="8" y1="13" y2="13"/>
+        <line x1="16" x2="8" y1="17" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <h2>სიახლეები არ არის</h2>
+      <p>ამჟამად სიახლეები არ არის დამატებული</p>
+    </div>
+
+    <div class="news-grid" *ngIf="news.length > 0" #newsGrid>
+      <article class="news-card" *ngFor="let newsItem of news" #newsCard>
+        <div class="news-card-image" *ngIf="hasImage(newsItem)">
+          <img [src]="newsItem.imageUrl" [alt]="newsItem.title" (load)="scheduleLayout()" />
+        </div>
+        
+        <div class="news-card-content">
+          <div class="news-card-header">
+            <h2 class="news-title">{{ newsItem.title }}</h2>
+            <div class="news-meta">
+              <div class="news-author">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>{{ newsItem.authorName }}</span>
+              </div>
+              <div class="news-date">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                  <line x1="16" x2="16" y1="2" y2="6"/>
+                  <line x1="8" x2="8" y1="2" y2="6"/>
+                  <line x1="3" x2="21" y1="10" y2="10"/>
+                </svg>
+                <span>{{ newsItem.createdAt }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="news-body">
+            <p class="news-content-text">{{ getTruncatedContent(newsItem.content) }}</p>
+          </div>
+
+          <button class="read-more-btn" (click)="openNewsModal(newsItem)" *ngIf="isLongContent(newsItem.content)">
+            <span>სრულად წაკითხვა</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <!-- News Detail Modal -->
+  <div class="modal-backdrop" *ngIf="modalOpen" (click)="closeModal()"></div>
+  <div class="news-modal" *ngIf="modalOpen && selectedNews">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeModal()" title="დახურვა">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="modal-content">
+        <div class="modal-image" *ngIf="hasImage(selectedNews)">
+          <img [src]="selectedNews.imageUrl" [alt]="selectedNews.title" />
+        </div>
+
+        <div class="modal-body">
+          <h1 class="modal-title">{{ selectedNews.title }}</h1>
+          
+          <div class="modal-meta">
+            <div class="modal-author">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>{{ selectedNews.authorName }}</span>
+            </div>
+            <div class="modal-date">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                <line x1="16" x2="16" y1="2" y2="6"/>
+                <line x1="8" x2="8" y1="2" y2="6"/>
+                <line x1="3" x2="21" y1="10" y2="10"/>
+              </svg>
+              <span>{{ selectedNews.createdAt }}</span>
+            </div>
+          </div>
+
+          <div class="modal-divider"></div>
+
+          <div class="modal-text">
+            <p>{{ selectedNews.content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-loading" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>იტვირთება...</p>
+  </div>
+</div>

@@ -1,0 +1,329 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, hsl(221.2, 83.2%, 53.3%) 0%, hsl(221.2, 83.2%, 45%) 100%);
+  padding: 20px;
+  position: relative;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+  color: white;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.logo svg {
+  width: 36px;
+  height: 36px;
+  color: white;
+}
+
+.login-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: white;
+}
+
+.login-header p {
+  font-size: 14px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.login-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.login-panel h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: hsl(222.2, 47.4%, 11.2%);
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(222.2, 47.4%, 11.2%);
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid hsl(214.3, 31.8%, 91.4%);
+  border-radius: 8px;
+  font-size: 14px;
+  color: hsl(222.2, 47.4%, 11.2%);
+  background: white;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: hsl(221.2, 83.2%, 53.3%);
+}
+
+.form-input::placeholder {
+  color: hsl(215.4, 16.3%, 65%);
+}
+
+.error-message {
+  padding: 12px 16px;
+  background: hsl(0, 84.2%, 95%);
+  color: hsl(0, 84.2%, 40%);
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 12px 24px;
+  background: hsl(221.2, 83.2%, 53.3%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-login:hover {
+  background: hsl(221.2, 83.2%, 48%);
+}
+
+.demo-hint {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.btn-demo-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-demo-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-demo-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Demo Panel */
+.demo-panel {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 500px;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.demo-panel.open {
+  right: 0;
+}
+
+.demo-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid hsl(214.3, 31.8%, 91.4%);
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+.demo-panel-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: hsl(222.2, 47.4%, 11.2%);
+  margin: 0;
+}
+
+.btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: hsl(215.4, 16.3%, 46.9%);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn-close:hover {
+  background: hsl(210, 40%, 96%);
+  color: hsl(222.2, 47.4%, 11.2%);
+}
+
+.demo-panel-content {
+  padding: 24px;
+}
+
+.demo-note {
+  font-size: 13px;
+  color: hsl(215.4, 16.3%, 46.9%);
+  margin: 0 0 20px 0;
+  padding: 12px 16px;
+  background: hsl(210, 40%, 98%);
+  border-radius: 8px;
+}
+
+.demo-users {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.demo-user {
+  padding: 16px;
+  border: 1px solid hsl(214.3, 31.8%, 91.4%);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.demo-user:hover {
+  background: hsl(210, 40%, 98%);
+  border-color: hsl(221.2, 83.2%, 53.3%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.demo-user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.demo-user-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: hsl(222.2, 47.4%, 11.2%);
+}
+
+.demo-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-field {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.demo-label {
+  color: hsl(215.4, 16.3%, 46.9%);
+  min-width: 70px;
+}
+
+.demo-value {
+  color: hsl(222.2, 47.4%, 11.2%);
+  font-family: 'Courier New', monospace;
+}
+
+.demo-value.password {
+  color: hsl(0, 84.2%, 60.2%);
+  font-weight: 600;
+}
+
+/* Role Badges */
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.role-submitter {
+  background: hsl(210, 40%, 96%);
+  color: hsl(221.2, 83.2%, 53.3%);
+}
+
+.role-supervisor {
+  background: hsl(142.1, 76.2%, 95%); /* Green background */
+  color: hsl(142.1, 70.6%, 45.3%); /* Green text */
+}
+
+.role-executor {
+  background: hsl(24.6, 95%, 95%); /* Orange background */
+  color: hsl(20.5, 90.2%, 48.2%); /* Orange text */
+}
+
+.role-admin {
+  background: hsl(0, 84.2%, 95%);
+  color: hsl(0, 84.2%, 60.2%);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .demo-panel {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .demo-panel.open {
+    right: 0;
+  }
+}
