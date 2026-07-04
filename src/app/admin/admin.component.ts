@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { AuthService } from '../auth.service';
+import { DigestDraftService } from '../digest-draft.service';
 import { Subscription } from 'rxjs';
 
 interface User {
@@ -104,23 +105,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   vacancyCategories = ['ღია საჯარო კონკურსი', 'შიდა კონკურსი', 'სააპლიკაციო ფორმა'];
   roles = ['შემვსები', 'ხელმძღვანელი', 'შემსრულებელი', 'ადმინისტრატორი'];
 
-  digestFormData: DigestItem = {
-    digestEntryID: 0,
-    title: '',
-    description: '',
-    imageUrl: '',
-    sourceName: '',
-    sourceUrl: '',
-    periodFrom: '',
-    periodTo: '',
-    isFeatured: false,
-    isActive: true,
-    authorName: '',
-    createdAt: ''
-  };
-
-  digestPhotoMode: 'url' | 'upload' = 'url';
-  digestUploadedFile: File | null = null;
+  // Subscription to "digest entry saved" events from the shared draft service, so
+  // this list stays in sync even though the save action is now triggered from the
+  // globally-rendered digest modal (owned by DigestDraftService) rather than here.
+  private digestSavedSubscription?: Subscription;
 
   get minDeadlineDate(): string {
     const now = new Date();
@@ -131,7 +119,10 @@ export class AdminComponent implements OnInit, OnDestroy {
   constructor(
     private userService: UserService,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    // Public: the template calls draftService.openAddDigestModal()/openEditDigestModal()
+    // directly, since the digest modal itself is now owned and rendered by AppComponent.
+    public draftService: DigestDraftService
   ) {}
 
   ngOnInit(): void {
@@ -146,10 +137,18 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadNews();
     this.loadVacancies();
     this.loadDigestEntries();
+
+    // Refresh the entries list whenever a digest entry is created/updated via the
+    // globally-rendered modal (the save action no longer necessarily happens while
+    // this component is even mounted, so we can't rely on a local callback).
+    this.digestSavedSubscription = this.draftService.digestSaved$.subscribe(() => {
+      this.loadDigestEntries();
+    });
   }
 
   ngOnDestroy(): void {
     this.userSubscription?.unsubscribe();
+    this.digestSavedSubscription?.unsubscribe();
   }
 
   loadUsers(): void {
@@ -228,15 +227,10 @@ export class AdminComponent implements OnInit, OnDestroy {
       location: '', description: '', deadline: '', isActive: true,
       authorName: '', createdAt: ''
     };
-    this.digestFormData = {
-      digestEntryID: 0, title: '', description: '', imageUrl: '',
-      sourceName: '', sourceUrl: '', periodFrom: '', periodTo: '',
-      isFeatured: false, isActive: true, authorName: '', createdAt: ''
-    };
-    this.digestPhotoMode = 'url';
-    this.digestUploadedFile = null;
   }
 
+  // Note: Escape-to-close for the digest modal is handled by AppComponent, since
+  // that modal is no longer part of this component's `modalOpen` state.
   @HostListener('document:keydown.escape', ['$event'])
   handleEscape(event: any): void {
     if (this.modalOpen) {
@@ -375,83 +369,10 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  openAddDigestModal(): void {
-    this.isEditMode = false;
-    this.digestFormData = {
-      digestEntryID: 0, title: '', description: '', imageUrl: '',
-      sourceName: '', sourceUrl: '', periodFrom: '', periodTo: '',
-      isFeatured: false, isActive: true, authorName: '', createdAt: ''
-    };
-    this.digestPhotoMode = 'url';
-    this.digestUploadedFile = null;
-    this.modalOpen = true;
-  }
-
-  openEditDigestModal(entry: DigestItem): void {
-    this.isEditMode = true;
-    this.digestFormData = { ...entry };
-    this.digestPhotoMode = 'url';
-    this.digestUploadedFile = null;
-    this.modalOpen = true;
-  }
-
-  onDigestFileChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      this.digestUploadedFile = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.digestFormData.imageUrl = e.target?.result as string;
-      };
-      reader.readAsDataURL(input.files[0]);
-    }
-  }
-
-  saveDigestEntry(): void {
-    if (!this.digestFormData.title || !this.digestFormData.description ||
-        !this.digestFormData.periodFrom || !this.digestFormData.periodTo) {
-      alert('გთხოვთ შეავსოთ სავალდებულო ველები');
-      return;
-    }
-
-    if (this.isEditMode) {
-      const updateData = {
-        title: this.digestFormData.title,
-        description: this.digestFormData.description,
-        imageUrl: this.digestFormData.imageUrl || null,
-        sourceName: this.digestFormData.sourceName,
-        sourceUrl: this.digestFormData.sourceUrl,
-        periodFrom: this.digestFormData.periodFrom,
-        periodTo: this.digestFormData.periodTo,
-        isFeatured: this.digestFormData.isFeatured,
-        isActive: this.digestFormData.isActive
-      };
-      this.userService.updateDigestEntry(this.digestFormData.digestEntryID, updateData).subscribe({
-        next: () => { this.loadDigestEntries(); this.closeModal(); },
-        error: (error) => { console.error('Error updating digest entry:', error); alert('შეცდომა ჩანაწერის განახლებისას'); }
-      });
-    } else {
-      const currentUser = this.authService.getCurrentUser();
-      if (!currentUser) { alert('მომხმარებელი არ არის ავტორიზებული'); return; }
-
-      const createData = {
-        title: this.digestFormData.title,
-        description: this.digestFormData.description,
-        imageUrl: this.digestFormData.imageUrl || null,
-        sourceName: this.digestFormData.sourceName,
-        sourceUrl: this.digestFormData.sourceUrl,
-        periodFrom: this.digestFormData.periodFrom,
-        periodTo: this.digestFormData.periodTo,
-        isFeatured: this.digestFormData.isFeatured,
-        isActive: this.digestFormData.isActive,
-        authorID: currentUser.userId
-      };
-      this.userService.createDigestEntry(createData).subscribe({
-        next: () => { this.loadDigestEntries(); this.closeModal(); },
-        error: (error) => { console.error('Error creating digest entry:', error); alert('შეცდომა ჩანაწერის შექმნისას'); }
-      });
-    }
-  }
+  // Adding/editing a digest entry now opens the app-wide modal owned by
+  // DigestDraftService (rendered in AppComponent, outside <router-outlet>), so it
+  // stays interactive across every route rather than being tied to this page.
+  // The (single-minimized-draft) confirmation guard lives in the service too.
 
   deleteDigestEntry(entryId: number): void {
     if (confirm('ნამდვილად გსურთ ჩანაწერის წაშლა?')) {

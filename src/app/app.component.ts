@@ -1,13 +1,15 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs';
 import { UserService, CurrentUser } from './user.service';
 import { AuthService } from './auth.service';
+import { DigestDraftService } from './digest-draft.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -21,7 +23,8 @@ export class AppComponent implements OnInit {
   constructor(
     private userService: UserService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    public draftService: DigestDraftService
   ) {
     // Hide header on login page
     this.router.events.pipe(
@@ -37,6 +40,14 @@ export class AppComponent implements OnInit {
         // Sync with UserService
         this.userService.setUserByRole(user.role);
         this.currentUserRole = user.role;
+        // Load any minimized digest draft so the global bubble reappears app-wide
+        // (including after a page refresh). Only admins can own a digest draft.
+        if (user.role === 'ადმინისტრატორი') {
+          this.draftService.init(user.userId);
+        }
+      } else {
+        // On logout, hide the bubble/modal (server-side draft is kept for next login).
+        this.draftService.reset();
       }
     });
 
@@ -99,6 +110,19 @@ export class AppComponent implements OnInit {
     
     if (!userDropdown && this.userDropdownOpen) {
       this.userDropdownOpen = false;
+    }
+  }
+
+  // Escape closes the globally-rendered digest modal (or, if the themed
+  // discard-draft confirmation is up, cancels that first). This is intentionally
+  // separate from AdminComponent's own Escape handler (which only covers the
+  // users/news/vacancies modals), since the digest modal no longer lives there.
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.draftService.isConfirmDialogVisible) {
+      this.draftService.resolveConfirmDialog(false);
+    } else if (this.draftService.isModalOpen) {
+      this.draftService.closeAndDiscard();
     }
   }
 }

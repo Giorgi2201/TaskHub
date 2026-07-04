@@ -143,3 +143,159 @@
 </header>
 
 <router-outlet />
+
+<!-- ────────────────────────────────────────────────────────────────────────
+     Global digest draft feature: bubble + create/edit modal.
+     Rendered here (outside <router-outlet>, hidden on /login like the header)
+     so they stay usable from ANY page with no navigation needed to reopen —
+     all state/logic is owned by DigestDraftService; this template just binds
+     to it. -->
+
+<!-- Themed "discard draft?" confirmation, replacing the native browser confirm()
+     so it matches the site's own visual design (colors/typography/spacing). -->
+<div class="confirm-backdrop" *ngIf="showHeader && isAuthenticated && (draftService.confirmDialogVisible$ | async)" (click)="draftService.resolveConfirmDialog(false)"></div>
+<div class="confirm-dialog" *ngIf="showHeader && isAuthenticated && (draftService.confirmDialogVisible$ | async)" role="alertdialog" aria-modal="true">
+  <div class="confirm-dialog-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+  </div>
+  <h3 class="confirm-dialog-title">დრაფტის წაშლა</h3>
+  <p class="confirm-dialog-message">{{ draftService.confirmDialogMessage }}</p>
+  <div class="confirm-dialog-actions">
+    <button class="confirm-btn confirm-btn-secondary" (click)="draftService.resolveConfirmDialog(false)">გაუქმება</button>
+    <button class="confirm-btn confirm-btn-danger" (click)="draftService.resolveConfirmDialog(true)">დიახ, წაშლა</button>
+  </div>
+</div>
+
+<!-- Floating chat-bubble shown while a draft is minimized. Clicking it restores
+     the full modal instantly (no route change). -->
+<button
+  class="digest-bubble"
+  *ngIf="showHeader && isAuthenticated && (draftService.digestModalMinimized$ | async)"
+  (click)="draftService.restore()"
+  title="დაიჯესტის დრაფტი — დაბრუნება">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="16" y1="13" x2="8" y2="13"/>
+    <line x1="16" y1="17" x2="8" y2="17"/>
+    <line x1="10" y1="9" x2="8" y2="9"/>
+  </svg>
+  <span class="digest-bubble-title">{{ draftService.formData.title || 'დაიჯესტის დრაფტი' }}</span>
+  <span class="digest-bubble-dot"></span>
+</button>
+
+<!-- Digest create/edit modal itself. -->
+<div class="modal-backdrop" *ngIf="showHeader && isAuthenticated && (draftService.digestModalOpen$ | async)" (click)="draftService.closeAndDiscard()"></div>
+<div class="modal digest-modal" *ngIf="showHeader && isAuthenticated && (draftService.digestModalOpen$ | async)">
+  <div class="modal-header">
+    <h2 class="modal-title">{{ (draftService.isEditMode$ | async) ? 'დაიჯესტის რედაქტირება' : 'ახალი დაიჯესტის დამატება' }}</h2>
+    <div class="modal-header-actions">
+      <!-- Minimize into the floating bubble (keeps the draft, persists it server-side) -->
+      <button class="modal-close" (click)="draftService.minimize()" title="ჩაკეცვა">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <button class="modal-close" (click)="draftService.closeAndDiscard()" title="დახურვა">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="digestTitle">სათაური <span class="required">*</span></label>
+      <input type="text" id="digestTitle" [(ngModel)]="draftService.formData.title" placeholder="შეიყვანეთ სათაური" class="form-input"/>
+    </div>
+
+    <div class="form-group">
+      <label for="digestDescription">აღწერა <span class="required">*</span></label>
+      <textarea id="digestDescription" [(ngModel)]="draftService.formData.description" placeholder="შეიყვანეთ აღწერა" class="form-textarea" rows="3"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>ფოტო</label>
+      <div class="photo-toggle">
+        <button type="button" class="photo-tab-btn" [class.active]="(draftService.digestPhotoMode$ | async) === 'url'" (click)="draftService.setPhotoMode('url')">URL</button>
+        <button type="button" class="photo-tab-btn" [class.active]="(draftService.digestPhotoMode$ | async) === 'upload'" (click)="draftService.setPhotoMode('upload')">ატვირთვა</button>
+      </div>
+      <div *ngIf="(draftService.digestPhotoMode$ | async) === 'url'" class="photo-input-area">
+        <input type="text" [(ngModel)]="draftService.formData.imageUrl" placeholder="https://example.com/image.jpg" class="form-input"/>
+      </div>
+      <div *ngIf="(draftService.digestPhotoMode$ | async) === 'upload'" class="photo-input-area">
+        <label class="file-upload-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span>{{ draftService.uploadedFile ? draftService.uploadedFile.name : 'ფაილის არჩევა' }}</span>
+          <input type="file" accept="image/*" (change)="draftService.onFileChange($event)" style="display:none"/>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="digestSourceName">წყაროს სახელი</label>
+        <input type="text" id="digestSourceName" [(ngModel)]="draftService.formData.sourceName" placeholder="მაგ: railway.ge" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label for="digestSourceUrl">წყაროს ბმული</label>
+        <input type="text" id="digestSourceUrl" [(ngModel)]="draftService.formData.sourceUrl" placeholder="https://railway.ge/..." class="form-input"/>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="digestPeriodFrom">პერიოდი-დან <span class="required">*</span></label>
+        <input type="date" id="digestPeriodFrom" [(ngModel)]="draftService.formData.periodFrom" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label for="digestPeriodTo">პერიოდი-მდე <span class="required">*</span></label>
+        <input type="date" id="digestPeriodTo" [(ngModel)]="draftService.formData.periodTo" class="form-input"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="toggle-group featured-toggle-group">
+        <div class="toggle-label-section">
+          <div class="toggle-label-with-icon">
+            <span class="featured-icon">★</span>
+            <div class="toggle-label">მთავარი მოვლენა</div>
+          </div>
+          <div class="toggle-description">ჩართვისას დაიჯესტი გამოჩნდება წრიულ ხატულებში (მაქს. 3)</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="draftService.formData.isFeatured"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="toggle-group">
+        <div class="toggle-label-section">
+          <div class="toggle-label">აქტიური ჩანაწერი</div>
+          <div class="toggle-description">გამოუქვეყნებელი ჩანაწერი საიტზე არ გამოჩნდება</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="draftService.formData.isActive"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn-secondary" (click)="draftService.closeAndDiscard()">გაუქმება</button>
+    <button class="btn-primary" (click)="draftService.saveDigestEntry()">{{ (draftService.isEditMode$ | async) ? 'შენახვა' : 'დამატება' }}</button>
+  </div>
+</div>

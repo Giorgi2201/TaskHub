@@ -393,3 +393,502 @@ tbody tr:last-child td { border-bottom: 0; }
 .table-wrap { overflow: auto; }
 .table-wrap table { min-width: 860px; }
 
+/* ── Global digest draft modal ───────────────────────────────────────────
+   Duplicated from admin.component.css: Angular component styles are scoped
+   per-component, and this modal now renders here (not in AdminComponent) so
+   it can stay open/interactive across every route. Only the classes actually
+   used by the digest modal are included; shared classes generic enough to be
+   reused by the users/news/vacancies modals remain defined in admin's own
+   stylesheet (unaffected by this refactor). */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.digest-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid hsl(214.3, 31.8%, 91.4%);
+}
+
+/* Groups the minimize + close buttons on the right of the digest modal header. */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: hsl(222.2, 47.4%, 11.2%);
+  margin: 0;
+}
+
+.modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: hsl(215.4, 16.3%, 46.9%);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.modal-close:hover {
+  background: hsl(210, 40%, 96%);
+  color: hsl(222.2, 47.4%, 11.2%);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(222.2, 47.4%, 11.2%);
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid hsl(214.3, 31.8%, 91.4%);
+  border-radius: 8px;
+  font-size: 14px;
+  color: hsl(222.2, 47.4%, 11.2%);
+  background: white;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: hsl(221.2, 83.2%, 53.3%);
+}
+
+.form-input::placeholder {
+  color: hsl(215.4, 16.3%, 65%);
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid hsl(214.3, 31.8%, 91.4%);
+  border-radius: 8px;
+  font-size: 14px;
+  color: hsl(222.2, 47.4%, 11.2%);
+  background: white;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: hsl(221.2, 83.2%, 53.3%);
+}
+
+.form-textarea::placeholder {
+  color: hsl(215.4, 16.3%, 65%);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+.required {
+  color: hsl(0, 72.2%, 50.6%);
+}
+
+.photo-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid hsl(214.3, 31.8%, 91.4%);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  width: fit-content;
+}
+
+.photo-tab-btn {
+  padding: 7px 18px;
+  border: none;
+  background: white;
+  color: hsl(215.4, 16.3%, 46.9%);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.photo-tab-btn.active {
+  background: hsl(221.2, 83.2%, 53.3%);
+  color: white;
+}
+
+.photo-input-area {
+  margin-top: 0;
+}
+
+.file-upload-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px dashed hsl(214.3, 31.8%, 91.4%);
+  border-radius: 8px;
+  cursor: pointer;
+  color: hsl(215.4, 16.3%, 46.9%);
+  font-size: 13px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.file-upload-label:hover {
+  border-color: hsl(221.2, 83.2%, 53.3%);
+  background: hsl(210, 40%, 98%);
+}
+
+.file-upload-label svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: hsl(221.2, 83.2%, 53.3%);
+}
+
+.toggle-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.toggle-label-section {
+  flex: 1;
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: hsl(222.2, 47.4%, 11.2%);
+  margin-bottom: 2px;
+}
+
+.toggle-description {
+  font-size: 12px;
+  color: hsl(215.4, 16.3%, 46.9%);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: hsl(214.3, 31.8%, 80%);
+  border-radius: 26px;
+  transition: background 0.25s;
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.25s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: hsl(221.2, 83.2%, 53.3%);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+}
+
+.featured-toggle-group {
+  background: hsl(48, 100%, 97%);
+  border: 1px solid hsl(38, 92%, 85%);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.toggle-label-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.toggle-label-with-icon .featured-icon {
+  font-size: 16px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid hsl(214.3, 31.8%, 91.4%);
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  background: white;
+  color: hsl(222.2, 47.4%, 11.2%);
+  border: 1px solid hsl(214.3, 31.8%, 91.4%);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: hsl(210, 40%, 98%);
+  border-color: hsl(214.3, 31.8%, 80%);
+}
+
+@media (max-width: 768px) {
+  .modal {
+    width: 95%;
+    margin: 20px;
+  }
+}
+
+/* ── Themed "discard draft?" confirmation dialog ─────────────────────────
+   Styled with the site's own design tokens (CSS custom properties defined in
+   styles.css), matching the header/nav/dashboard look-and-feel — unlike the
+   digest modal above, which intentionally mirrors the admin panel's palette. */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: hsl(220 25% 12% / .45);
+  backdrop-filter: blur(2px);
+  z-index: 1300;
+  animation: confirm-fade-in 0.15s ease-out;
+}
+
+.confirm-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1301;
+  width: 90%;
+  max-width: 380px;
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow-card), 0 20px 45px hsl(220 25% 12% / .25);
+  padding: 28px 24px 24px;
+  text-align: center;
+  animation: confirm-pop-in 0.18s ease-out;
+}
+
+.confirm-dialog-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: hsl(var(--warning) / .18);
+  color: hsl(var(--warning));
+}
+
+.confirm-dialog-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.confirm-dialog-title {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+}
+
+.confirm-dialog-message {
+  margin: 0 0 22px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-btn {
+  flex: 1;
+  height: 42px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter .15s ease, transform .05s ease;
+}
+
+.confirm-btn:active {
+  transform: translateY(1px);
+}
+
+.confirm-btn-secondary {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.confirm-btn-secondary:hover {
+  filter: brightness(0.97);
+}
+
+.confirm-btn-danger {
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+}
+
+.confirm-btn-danger:hover {
+  filter: brightness(1.08);
+}
+
+@keyframes confirm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes confirm-pop-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.94); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ── Global minimized digest draft bubble ────────────────────────────── */
+.digest-bubble {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 260px;
+  padding: 12px 18px 12px 14px;
+  border: none;
+  border-radius: 999px;
+  background: hsl(221.2, 83.2%, 53.3%);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  animation: digest-bubble-in 0.25s ease-out;
+}
+
+.digest-bubble:hover {
+  background: hsl(221.2, 83.2%, 48%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.45);
+}
+
+.digest-bubble svg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.digest-bubble-title {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Small "unsaved draft" indicator dot. */
+.digest-bubble-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: hsl(24.6, 95%, 53%);
+  border: 2px solid white;
+}
+
+@keyframes digest-bubble-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
