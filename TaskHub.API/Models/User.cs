@@ -17,5 +17,6 @@ namespace TaskHub.API.Models
         public ICollection<Request> InitiatedRequests { get; set; } = new List<Request>();
         public ICollection<RequestParticipant> Participations { get; set; } = new List<RequestParticipant>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<DigestEntry> DigestEntries { get; set; } = new List<DigestEntry>();
     }
 }

@@ -98,7 +98,6 @@ export class UserService {
     return this.currentUserSubject.value;
   }
 
-  // User management methods
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${this.apiUrl}/users`);
   }
@@ -119,7 +118,6 @@ export class UserService {
     return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
   }
 
-  // News management methods
   getNews(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/news`);
   }
@@ -129,7 +127,6 @@ export class UserService {
   }
 
   createNews(newsData: any): Observable<any> {
-    // Pass the news data as-is, authorID should be included by the component
     return this.http.post<any>(`${this.apiUrl}/news`, newsData);
   }
 
@@ -139,5 +136,47 @@ export class UserService {
 
   deleteNews(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/news/${id}`);
+  }
+
+  getVacancies(activeOnly: boolean = false): Observable<any[]> {
+    const url = activeOnly
+      ? `${this.apiUrl}/vacancies?activeOnly=true`
+      : `${this.apiUrl}/vacancies`;
+    return this.http.get<any[]>(url);
+  }
+
+  getVacancy(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/vacancies/${id}`);
+  }
+
+  createVacancy(vacancyData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/vacancies`, vacancyData);
+  }
+
+  updateVacancy(id: number, vacancyData: any): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/vacancies/${id}`, vacancyData);
+  }
+
+  deleteVacancy(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/vacancies/${id}`);
+  }
+
+  getDigestEntries(activeOnly: boolean = false): Observable<any[]> {
+    const url = activeOnly
+      ? `${this.apiUrl}/digest?activeOnly=true`
+      : `${this.apiUrl}/digest`;
+    return this.http.get<any[]>(url);
+  }
+
+  createDigestEntry(data: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/digest`, data);
+  }
+
+  updateDigestEntry(id: number, data: any): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/digest/${id}`, data);
+  }
+
+  deleteDigestEntry(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/digest/${id}`);
   }
 }

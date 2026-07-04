@@ -8,7 +8,9 @@ import { LoginComponent } from './login/login.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { NewsComponent } from './news/news.component';
 import { InfoComponent } from './info/info.component';
+import { VacanciesComponent } from './vacancies/vacancies.component';
 import { authGuard } from './auth.guard';
+import { DigestComponent } from './digest/digest.component';
 
 export const routes: Routes = [
   {
@@ -46,6 +48,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'vacancies',
+    component: VacanciesComponent,
+    canActivate: [authGuard]
+  },
+  {
     path: 'news',
     component: NewsComponent,
     canActivate: [authGuard]
@@ -53,6 +60,11 @@ export const routes: Routes = [
   {
     path: 'info',
     component: InfoComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'digest',
+    component: DigestComponent,
     canActivate: [authGuard]
   },
   {

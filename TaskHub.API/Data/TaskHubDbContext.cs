@@ -17,6 +17,8 @@ namespace TaskHub.API.Data
         public DbSet<RequestParticipant> RequestParticipants { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<News> News { get; set; }
+        public DbSet<Vacancy> Vacancies { get; set; }
+        public DbSet<DigestEntry> DigestEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -75,6 +77,12 @@ namespace TaskHub.API.Data
                 .HasOne(n => n.Author)
                 .WithMany()
                 .HasForeignKey(n => n.AuthorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Vacancy>()
+                .HasOne(v => v.Author)
+                .WithMany()
+                .HasForeignKey(v => v.AuthorID)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Seed data

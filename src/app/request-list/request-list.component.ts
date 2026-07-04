@@ -16,20 +16,16 @@ export class RequestListComponent implements OnInit {
   requests: Request[] = [];
   searchTerm = '';
   
-  // Pagination
   currentPage = 1;
   pageSize = 5;
 
-  // Status filter
   statusDropdownOpen = false;
   selectedStatusFilter: number | null = null;
 
-  // Edit modal
   editModalOpen = false;
   selectedRequest: Request | null = null;
   currentUserRole = '';
 
-  // Edit form
   selectedExecutorId: number | null = null;
   selectedStatusId: number | null = null;
   editComment = '';
@@ -86,15 +82,13 @@ export class RequestListComponent implements OnInit {
 
   get filteredRequests() {
     let filtered = this.requests;
-
-    // Filter by search term (description only)
+  
     if (this.searchTerm.trim()) {
       filtered = filtered.filter(r => 
         r.description.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     }
 
-    // Filter by status
     if (this.selectedStatusFilter !== null) {
       filtered = filtered.filter(r => r.statusID === this.selectedStatusFilter);
     }
@@ -150,7 +144,7 @@ export class RequestListComponent implements OnInit {
   selectStatus(statusId: number | null) {
     this.selectedStatusFilter = statusId;
     this.statusDropdownOpen = false;
-    this.currentPage = 1; // Reset to first page when filtering
+    this.currentPage = 1;
   }
 
   getSelectedStatusLabel(): string {
@@ -171,7 +165,6 @@ export class RequestListComponent implements OnInit {
     }
   }
 
-  // Maps the ID to Georgian status text
   getStatusLabel(id: number) {
     switch(id) {
       case 1: return 'ახალი';
@@ -198,7 +191,7 @@ export class RequestListComponent implements OnInit {
 
   onSearchChange(event: Event) {
     this.searchTerm = (event.target as HTMLInputElement).value;
-    this.currentPage = 1; // Reset to first page when searching
+    this.currentPage = 1;
   }
 
   canEditRequest(statusId: number): boolean {

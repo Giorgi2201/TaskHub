@@ -3,7 +3,6 @@ using TaskHub.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -12,11 +11,9 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-// Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<TaskHubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Configure CORS to allow Angular app
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -30,26 +27,37 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Ensure database is created (only creates if it doesn't exist)
+// Apply pending migrations on startup; data is preserved across restarts.
+// If the database doesn't exist yet it is created automatically by Migrate().
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<TaskHubDbContext>();
-    dbContext.Database.EnsureCreated();
+
+    // If the database exists but was created with EnsureCreated (no __EFMigrationsHistory table),
+    // drop it cleanly before Migrate() runs so no SQL errors are logged.
+    if (dbContext.Database.CanConnect())
+    {
+        var connection = dbContext.Database.GetDbConnection();
+        connection.Open();
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '__EFMigrationsHistory'";
+        var hasMigrationsTable = (int)(cmd.ExecuteScalar() ?? 0) > 0;
+        connection.Close();
+
+        if (!hasMigrationsTable)
+            dbContext.Database.EnsureDeleted();
+    }
+
+    dbContext.Database.Migrate();
 }
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
-// Enable CORS
 app.UseCors("AllowAngularApp");
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
