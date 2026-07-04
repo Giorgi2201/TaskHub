@@ -5,7 +5,15 @@
       <p class="page-subtitle">აირჩიეთ კატეგორია</p>
     </div>
 
-    <div class="category-section">
+    <!-- Loading -->
+    <div class="category-section" *ngIf="loading">
+      <div class="list-loading">
+        <div class="loading-spinner"></div>
+        <p>კატეგორიები იტვირთება...</p>
+      </div>
+    </div>
+
+    <div class="category-section" *ngIf="!loading">
       <h2>მოთხოვნის კატეგორია</h2>
       <p class="section-description">აირჩიეთ კატეგორია, რომელიც შეესაბამება თქვენს მოთხოვნას</p>
 

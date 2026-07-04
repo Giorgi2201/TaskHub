@@ -1,4 +1,9 @@
-<div class="detail-page" *ngIf="requestData">
+<div class="detail-loading" *ngIf="loading">
+  <div class="loading-spinner"></div>
+  <p>იტვირთება...</p>
+</div>
+
+<div class="detail-page" *ngIf="!loading && requestData">
   <div class="container">
     <div class="detail-header">
       <h1>მოთხოვნა #{{ requestData.id }}</h1>

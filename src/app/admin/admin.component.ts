@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { AuthService } from '../auth.service';
 import { DigestDraftService } from '../digest-draft.service';
+import { ToastService } from '../toast.service';
 import { Subscription } from 'rxjs';
 
 interface User {
@@ -62,6 +63,8 @@ interface DigestItem {
 })
 export class AdminComponent implements OnInit, OnDestroy {
   activeTab: 'users' | 'news' | 'vacancies' | 'digest' = 'users';
+  loading = false;
+  private loadCounter = 0;
   users: User[] = [];
   news: NewsItem[] = [];
   vacancies: VacancyItem[] = [];
@@ -122,7 +125,8 @@ export class AdminComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     // Public: the template calls draftService.openAddDigestModal()/openEditDigestModal()
     // directly, since the digest modal itself is now owned and rendered by AppComponent.
-    public draftService: DigestDraftService
+    public draftService: DigestDraftService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -151,31 +155,40 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.digestSavedSubscription?.unsubscribe();
   }
 
+  private decrementLoad(): void {
+    this.loadCounter--;
+    if (this.loadCounter <= 0) { this.loadCounter = 0; this.loading = false; }
+  }
+
   loadUsers(): void {
+    this.loadCounter++; this.loading = true;
     this.userService.getUsers().subscribe({
-      next: (users) => { this.users = users; },
-      error: (error) => { console.error('Error loading users:', error); }
+      next: (users) => { this.users = users; this.decrementLoad(); },
+      error: (error) => { console.error('Error loading users:', error); this.decrementLoad(); this.toastService.showError('მომხმარებლების ჩატვირთვა ვერ მოხერხდა'); }
     });
   }
 
   loadNews(): void {
+    this.loadCounter++; this.loading = true;
     this.userService.getNews().subscribe({
-      next: (news) => { this.news = news; },
-      error: (error) => { console.error('Error loading news:', error); }
+      next: (news) => { this.news = news; this.decrementLoad(); },
+      error: (error) => { console.error('Error loading news:', error); this.decrementLoad(); this.toastService.showError('სიახლეების ჩატვირთვა ვერ მოხერხდა'); }
     });
   }
 
   loadVacancies(): void {
+    this.loadCounter++; this.loading = true;
     this.userService.getVacancies().subscribe({
-      next: (vacancies) => { this.vacancies = vacancies; },
-      error: (error) => { console.error('Error loading vacancies:', error); }
+      next: (vacancies) => { this.vacancies = vacancies; this.decrementLoad(); },
+      error: (error) => { console.error('Error loading vacancies:', error); this.decrementLoad(); this.toastService.showError('ვაკანსიების ჩატვირთვა ვერ მოხერხდა'); }
     });
   }
 
   loadDigestEntries(): void {
+    this.loadCounter++; this.loading = true;
     this.userService.getDigestEntries().subscribe({
-      next: (entries) => { this.digestEntries = entries; },
-      error: (error) => { console.error('Error loading digest entries:', error); }
+      next: (entries) => { this.digestEntries = entries; this.decrementLoad(); },
+      error: (error) => { console.error('Error loading digest entries:', error); this.decrementLoad(); this.toastService.showError('ჩანაწერების ჩატვირთვა ვერ მოხერხდა'); }
     });
   }
 
@@ -241,19 +254,19 @@ export class AdminComponent implements OnInit, OnDestroy {
   saveUser(): void {
     if (!this.formData.name || !this.formData.role || !this.formData.department ||
         !this.formData.email || !this.formData.title) {
-      alert('გთხოვთ შეავსოთ ყველა ველი');
+      this.toastService.showWarning('გთხოვთ შეავსოთ ყველა ველი');
       return;
     }
 
     if (this.isEditMode) {
       this.userService.updateUser(this.formData.userID, this.formData).subscribe({
-        next: () => { this.loadUsers(); this.closeModal(); },
-        error: (error) => { console.error('Error updating user:', error); alert('შეცდომა მომხმარებლის განახლებისას'); }
+        next: () => { this.loadUsers(); this.closeModal(); this.toastService.showSuccess('მომხმარებელი განახლდა'); },
+        error: () => { this.toastService.showError('შეცდომა მომხმარებლის განახლებისას'); }
       });
     } else {
       this.userService.createUser(this.formData).subscribe({
-        next: () => { this.loadUsers(); this.closeModal(); },
-        error: (error) => { console.error('Error creating user:', error); alert('შეცდომა მომხმარებლის შექმნისას'); }
+        next: () => { this.loadUsers(); this.closeModal(); this.toastService.showSuccess('მომხმარებელი დაემატა'); },
+        error: () => { this.toastService.showError('შეცდომა მომხმარებლის შექმნისას'); }
       });
     }
   }
@@ -261,8 +274,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   deleteUser(userId: number): void {
     if (confirm('ნამდვილად გსურთ მომხმარებლის წაშლა?')) {
       this.userService.deleteUser(userId).subscribe({
-        next: () => { this.loadUsers(); },
-        error: (error) => { console.error('Error deleting user:', error); alert('შეცდომა მომხმარებლის წაშლისას'); }
+        next: () => { this.loadUsers(); this.toastService.showSuccess('მომხმარებელი წაიშალა'); },
+        error: () => { this.toastService.showError('შეცდომა მომხმარებლის წაშლისას'); }
       });
     }
   }
@@ -281,7 +294,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   saveNews(): void {
     if (!this.newsFormData.title || !this.newsFormData.content) {
-      alert('გთხოვთ შეავსოთ სავალდებულო ველები');
+      this.toastService.showWarning('გთხოვთ შეავსოთ სავალდებულო ველები');
       return;
     }
 
@@ -292,12 +305,12 @@ export class AdminComponent implements OnInit, OnDestroy {
         imageUrl: this.newsFormData.imageUrl || null
       };
       this.userService.updateNews(this.newsFormData.newsID, updateData).subscribe({
-        next: () => { this.loadNews(); this.closeModal(); },
-        error: (error) => { console.error('Error updating news:', error); alert('შეცდომა სიახლის განახლებისას'); }
+        next: () => { this.loadNews(); this.closeModal(); this.toastService.showSuccess('სიახლე განახლდა'); },
+        error: () => { this.toastService.showError('შეცდომა სიახლის განახლებისას'); }
       });
     } else {
       const currentUser = this.authService.getCurrentUser();
-      if (!currentUser) { alert('მომხმარებელი არ არის ავტორიზებული'); return; }
+      if (!currentUser) { this.toastService.showError('მომხმარებელი არ არის ავტორიზებული'); return; }
 
       const createData = {
         title: this.newsFormData.title,
@@ -306,8 +319,8 @@ export class AdminComponent implements OnInit, OnDestroy {
         authorID: currentUser.userId
       };
       this.userService.createNews(createData).subscribe({
-        next: () => { this.loadNews(); this.closeModal(); },
-        error: (error) => { console.error('Error creating news:', error); alert('შეცდომა სიახლის შექმნისას'); }
+        next: () => { this.loadNews(); this.closeModal(); this.toastService.showSuccess('სიახლე დაემატა'); },
+        error: () => { this.toastService.showError('შეცდომა სიახლის შექმნისას'); }
       });
     }
   }
@@ -315,8 +328,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   deleteNews(newsId: number): void {
     if (confirm('ნამდვილად გსურთ სიახლის წაშლა?')) {
       this.userService.deleteNews(newsId).subscribe({
-        next: () => { this.loadNews(); },
-        error: (error) => { console.error('Error deleting news:', error); alert('შეცდომა სიახლის წაშლისას'); }
+        next: () => { this.loadNews(); this.toastService.showSuccess('სიახლე წაიშალა'); },
+        error: () => { this.toastService.showError('შეცდომა სიახლის წაშლისას'); }
       });
     }
   }
@@ -339,23 +352,23 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   saveVacancy(): void {
     if (!this.vacancyFormData.title || !this.vacancyFormData.category || !this.vacancyFormData.description) {
-      alert('გთხოვთ შეავსოთ სავალდებულო ველები');
+      this.toastService.showWarning('გთხოვთ შეავსოთ სავალდებულო ველები');
       return;
     }
 
     if (this.isEditMode) {
       this.userService.updateVacancy(this.vacancyFormData.vacancyID, this.vacancyFormData).subscribe({
-        next: () => { this.loadVacancies(); this.closeModal(); },
-        error: (error) => { console.error('Error updating vacancy:', error); alert('შეცდომა ვაკანსიის განახლებისას'); }
+        next: () => { this.loadVacancies(); this.closeModal(); this.toastService.showSuccess('ვაკანსია განახლდა'); },
+        error: () => { this.toastService.showError('შეცდომა ვაკანსიის განახლებისას'); }
       });
     } else {
       const currentUser = this.authService.getCurrentUser();
-      if (!currentUser) { alert('მომხმარებელი არ არის ავტორიზებული'); return; }
+      if (!currentUser) { this.toastService.showError('მომხმარებელი არ არის ავტორიზებული'); return; }
 
       const createData = { ...this.vacancyFormData, authorID: currentUser.userId };
       this.userService.createVacancy(createData).subscribe({
-        next: () => { this.loadVacancies(); this.closeModal(); },
-        error: (error) => { console.error('Error creating vacancy:', error); alert('შეცდომა ვაკანსიის შექმნისას'); }
+        next: () => { this.loadVacancies(); this.closeModal(); this.toastService.showSuccess('ვაკანსია დაემატა'); },
+        error: () => { this.toastService.showError('შეცდომა ვაკანსიის შექმნისას'); }
       });
     }
   }
@@ -363,8 +376,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   deleteVacancy(vacancyId: number): void {
     if (confirm('ნამდვილად გსურთ ვაკანსიის წაშლა?')) {
       this.userService.deleteVacancy(vacancyId).subscribe({
-        next: () => { this.loadVacancies(); },
-        error: (error) => { console.error('Error deleting vacancy:', error); alert('შეცდომა ვაკანსიის წაშლისას'); }
+        next: () => { this.loadVacancies(); this.toastService.showSuccess('ვაკანსია წაიშალა'); },
+        error: () => { this.toastService.showError('შეცდომა ვაკანსიის წაშლისას'); }
       });
     }
   }
@@ -377,8 +390,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   deleteDigestEntry(entryId: number): void {
     if (confirm('ნამდვილად გსურთ ჩანაწერის წაშლა?')) {
       this.userService.deleteDigestEntry(entryId).subscribe({
-        next: () => { this.loadDigestEntries(); },
-        error: (error) => { console.error('Error deleting digest entry:', error); alert('შეცდომა ჩანაწერის წაშლისას'); }
+        next: () => { this.loadDigestEntries(); this.toastService.showSuccess('ჩანაწერი წაიშალა'); },
+        error: () => { this.toastService.showError('შეცდომა ჩანაწერის წაშლისას'); }
       });
     }
   }

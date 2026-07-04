@@ -263,18 +263,15 @@
   font-size: 14px;
 }
 
-.loading-spinner {
+.loading-state .loading-spinner {
   width: 36px;
   height: 36px;
-  border: 3px solid hsl(214.3, 31.8%, 91.4%);
-  border-top-color: hsl(221.2, 83.2%, 53.3%);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  border-width: 3px;
+  border-color: hsl(214.3, 31.8%, 91.4%);
+  animation-duration: 0.7s;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* Base .loading-spinner and @keyframes spin live in shared.css */
 
 /* ─── Responsive ─── */
 @media (max-width: 768px) {

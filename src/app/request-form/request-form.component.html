@@ -12,7 +12,14 @@
       უკან დაბრუნება
     </button>
 
-    <form class="request-form" (submit)="submitRequest($event)">
+    <div class="loading-section" *ngIf="loading">
+      <div class="list-loading">
+        <div class="loading-spinner"></div>
+        <p>მოთხოვნის ფორმა იტვირთება...</p>
+      </div>
+    </div>
+
+    <form class="request-form" (submit)="submitRequest($event)" *ngIf="!loading">
       <!-- მოთხოვნის დეტალები -->
       <div class="form-section">
         <h2>მოთხოვნის დეტალები</h2>

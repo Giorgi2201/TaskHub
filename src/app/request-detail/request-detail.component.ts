@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RequestService, RequestDetail } from '../request.service';
 import { UserService } from '../user.service';
+import { ToastService } from '../toast.service';
 
 @Component({
   selector: 'app-request-detail',
@@ -16,12 +17,14 @@ export class RequestDetailComponent implements OnInit {
   currentUserRole = '';
   commentText = '';
   requestId = 0;
+  loading = true;
 
   constructor(
     private router: Router, 
     private route: ActivatedRoute,
     private requestService: RequestService,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -37,10 +40,13 @@ export class RequestDetailComponent implements OnInit {
   }
 
   loadRequest() {
+    this.loading = true;
     this.requestService.getRequest(this.requestId).subscribe({
-      next: (data) => this.requestData = data,
+      next: (data) => { this.requestData = data; this.loading = false; },
       error: (err) => {
         console.error('Error loading request:', err);
+        this.loading = false;
+        this.toastService.showError('მოთხოვნის ჩატვირთვა ვერ მოხერხდა');
         this.router.navigate(['/requests']);
       }
     });
@@ -64,7 +70,7 @@ export class RequestDetailComponent implements OnInit {
 
   rejectRequest() {
     if (!this.commentText.trim()) {
-      alert('უარყოფისთვის აუცილებელია კომენტარის დამატება');
+      this.toastService.showWarning('უარყოფისთვის აუცილებელია კომენტარის დამატება');
       return;
     }
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { RequestService, Request } from '../request.service';
 import { AuthService } from '../auth.service';
+import { ToastService } from '../toast.service';
 
 @Component({
   selector: 'app-request-form',
@@ -23,6 +24,9 @@ export class RequestFormComponent implements OnInit {
   showWarning: boolean = false;
   isSubmitting: boolean = false;
 
+  // Loading state for subcategories
+  loading = true;
+
   // Initiator data from logged-in user
   initiatorName: string = '';
   initiatorEmail: string = '';
@@ -35,7 +39,8 @@ export class RequestFormComponent implements OnInit {
     private router: Router, 
     private route: ActivatedRoute,
     private requestService: RequestService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -69,14 +74,16 @@ export class RequestFormComponent implements OnInit {
   }
 
   loadSubcategories() {
+    this.loading = true;
     this.requestService.getCategories().subscribe({
       next: (categories) => {
         const category = categories.find(c => c.categoryName === this.categoryName);
         if (category) {
           this.subcategories = category.subcategories.map(s => s.subcategoryName);
         }
+        this.loading = false;
       },
-      error: (err) => console.error('Error loading subcategories:', err)
+      error: (err) => { console.error('Error loading subcategories:', err); this.loading = false; this.toastService.showError('ქვეკატეგორიების ჩატვირთვა ვერ მოხერხდა'); }
     });
   }
 
@@ -125,6 +132,7 @@ export class RequestFormComponent implements OnInit {
     this.requestService.createRequest(newRequest).subscribe({
       next: () => {
         this.isSubmitting = false;
+        this.toastService.showSuccess('მოთხოვნა წარმატებით გაიგზავნა');
         this.router.navigate(['/requests']);
       },
       error: (err) => {
@@ -132,6 +140,7 @@ export class RequestFormComponent implements OnInit {
         this.warningMessage = 'კავშირის შეცდომა: დარწმუნდით რომ Backend ჩართულია';
         this.showWarning = true;
         console.error(err);
+        this.toastService.showError('მოთხოვნის გაგზავნა ვერ მოხერხდა');
       }
     });
   }

@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 import { UserService, CurrentUser } from './user.service';
 import { AuthService } from './auth.service';
 import { DigestDraftService } from './digest-draft.service';
+import { ToastService } from './toast.service';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +25,8 @@ export class AppComponent implements OnInit {
     private userService: UserService,
     private authService: AuthService,
     private router: Router,
-    public draftService: DigestDraftService
+    public draftService: DigestDraftService,
+    public toastService: ToastService
   ) {
     // Hide header on login page
     this.router.events.pipe(

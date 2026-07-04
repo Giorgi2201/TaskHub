@@ -16,6 +16,7 @@ interface CategoryWithIcon {
 })
 export class RequestNewComponent implements OnInit {
   categories: CategoryWithIcon[] = [];
+  loading = true;
 
   private categoryIcons: { [key: string]: string } = {
     'კომპიუტერული ტექნიკა': 'computer',
@@ -36,14 +37,16 @@ export class RequestNewComponent implements OnInit {
   }
 
   loadCategories() {
+    this.loading = true;
     this.requestService.getCategories().subscribe({
       next: (data) => {
         this.categories = data.map(cat => ({
           name: cat.categoryName,
           icon: this.categoryIcons[cat.categoryName] || 'other'
         }));
+        this.loading = false;
       },
-      error: (err) => console.error('Error loading categories:', err)
+      error: (err) => { console.error('Error loading categories:', err); this.loading = false; }
     });
   }
 

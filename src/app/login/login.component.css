@@ -97,6 +97,9 @@
   color: hsl(215.4, 16.3%, 65%);
 }
 
+/* Note: login's form-input has larger padding (12px 16px) vs shared.css (10px 12px) */
+/* so it intentionally stays here */
+
 .error-message {
   padding: 12px 16px;
   background: hsl(0, 84.2%, 95%);
@@ -287,33 +290,9 @@
   font-weight: 600;
 }
 
-/* Role Badges */
+/* Role badges base live in shared.css; login uses 11px for tighter fit */
 .role-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 6px;
   font-size: 11px;
-  font-weight: 500;
-}
-
-.role-submitter {
-  background: hsl(210, 40%, 96%);
-  color: hsl(221.2, 83.2%, 53.3%);
-}
-
-.role-supervisor {
-  background: hsl(142.1, 76.2%, 95%); /* Green background */
-  color: hsl(142.1, 70.6%, 45.3%); /* Green text */
-}
-
-.role-executor {
-  background: hsl(24.6, 95%, 95%); /* Orange background */
-  color: hsl(20.5, 90.2%, 48.2%); /* Orange text */
-}
-
-.role-admin {
-  background: hsl(0, 84.2%, 95%);
-  color: hsl(0, 84.2%, 60.2%);
 }
 
 /* Responsive */

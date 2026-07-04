@@ -76,15 +76,106 @@ nav.primary {
   flex-shrink: 0;
 }
 /* User dropdown */
+.user-dropdown-wrapper {
+  position: relative;
+}
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 999px;
+  transition: background .15s ease, box-shadow .15s ease;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+.user-btn:hover { background: hsl(var(--sidebar-accent)); }
+.user-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--sidebar-background)), 0 0 0 4px hsl(var(--sidebar-primary) / .6);
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: hsl(var(--sidebar-accent));
+  display: grid;
+  place-items: center;
+  font-weight: 750;
+  font-size: 13px;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1.5px hsl(var(--sidebar-primary) / .35);
+}
+
+.user-meta {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  line-height: 1.2;
+  text-align: left;
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .user-meta { display: flex; }
+}
+.user-meta .name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  color: hsl(var(--sidebar-foreground));
+}
+
+/* Role indicator is a compact, self-contained pill (background + text) rather
+   than bare colored text, so it reads as a deliberate badge instead of stray
+   highlighted text sitting under the name. */
+.user-meta .title {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Role colors for user title */
+.user-meta .title.role-submitter { color: rgb(96 165 250); background: rgb(96 165 250 / .16); }
+.user-meta .title.role-supervisor { color: rgb(34 197 94); background: rgb(34 197 94 / .16); }
+.user-meta .title.role-executor { color: rgb(251 146 60); background: rgb(251 146 60 / .16); }
+.user-meta .title.role-admin { color: rgb(168 85 247); background: rgb(168 85 247 / .16); }
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: .5;
+  transition: transform .2s ease, opacity .2s ease;
+}
+.user-btn:hover .chevron {
+  opacity: .8;
+}
+
 .user-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   right: 0;
   min-width: 200px;
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: 12px;
-  box-shadow: 0 4px 12px hsl(220 25% 12% / .12);
+  box-shadow: 0 6px 20px hsl(220 25% 12% / .14);
   overflow: hidden;
   z-index: 9999;
   padding: 4px;
@@ -94,7 +185,7 @@ nav.primary {
 .user-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   padding: 10px 12px;
   border: none;
@@ -106,15 +197,12 @@ nav.primary {
   color: hsl(var(--foreground));
   border-radius: 8px;
 }
-
 .user-dropdown-item:hover {
   background: hsl(var(--muted) / .50);
 }
-
 .user-dropdown-item.logout {
   color: hsl(var(--destructive));
 }
-
 .user-dropdown-item.logout:hover {
   background: hsl(var(--destructive) / .10);
 }
@@ -123,52 +211,6 @@ nav.primary {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-}
-.user-dropdown-wrapper {
-  position: relative;
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 14px;
-  transition: background .15s ease;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: inherit;
-}
-.user:hover { background: hsl(var(--sidebar-accent)); }
-.avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  background: hsl(var(--sidebar-accent));
-  display: grid;
-  place-items: center;
-  font-weight: 750;
-}
-.user-meta { display: none; }
-@media (min-width: 640px) {
-  .user-meta { display: block; }
-}
-.user-meta .name { font-size: 14px; font-weight: 700; margin: 0; line-height: 1.15; }
-.user-meta .title { font-size: 12px; margin: 2px 0 0; font-weight: 600; }
-
-/* Role colors for user title */
-.user-meta .title.role-submitter {
-  color: rgb(96 165 250);
-}
-.user-meta .title.role-supervisor {
-  color: rgb(34 197 94); /* Green */
-}
-.user-meta .title.role-executor {
-  color: rgb(251 146 60); /* Orange */
-}
-.user-meta .title.role-admin {
-  color: rgb(168 85 247);
 }
 
 /* mobile bottom nav */
@@ -394,48 +436,14 @@ tbody tr:last-child td { border-bottom: 0; }
 .table-wrap table { min-width: 860px; }
 
 /* ── Global digest draft modal ───────────────────────────────────────────
-   Duplicated from admin.component.css: Angular component styles are scoped
-   per-component, and this modal now renders here (not in AdminComponent) so
-   it can stay open/interactive across every route. Only the classes actually
-   used by the digest modal are included; shared classes generic enough to be
-   reused by the users/news/vacancies modals remain defined in admin's own
-   stylesheet (unaffected by this refactor). */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-}
-
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow: auto;
-}
+   Modal base styles (modal-backdrop, modal, modal-header, modal-title,
+   modal-close, modal-body, modal-footer, form-group, form-input, 
+   form-textarea, form-row, required) now live in shared.css.             
+   Only digest-specific additions remain here.                           */
 
 .digest-modal {
   max-height: 90vh;
   overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  border-bottom: 1px solid hsl(214.3, 31.8%, 91.4%);
 }
 
 /* Groups the minimize + close buttons on the right of the digest modal header. */
@@ -443,113 +451,6 @@ tbody tr:last-child td { border-bottom: 0; }
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.modal-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: hsl(222.2, 47.4%, 11.2%);
-  margin: 0;
-}
-
-.modal-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  color: hsl(215.4, 16.3%, 46.9%);
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.modal-close svg {
-  width: 20px;
-  height: 20px;
-}
-
-.modal-close:hover {
-  background: hsl(210, 40%, 96%);
-  color: hsl(222.2, 47.4%, 11.2%);
-}
-
-.modal-body {
-  padding: 24px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: hsl(222.2, 47.4%, 11.2%);
-  margin-bottom: 8px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid hsl(214.3, 31.8%, 91.4%);
-  border-radius: 8px;
-  font-size: 14px;
-  color: hsl(222.2, 47.4%, 11.2%);
-  background: white;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: hsl(221.2, 83.2%, 53.3%);
-}
-
-.form-input::placeholder {
-  color: hsl(215.4, 16.3%, 65%);
-}
-
-.form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid hsl(214.3, 31.8%, 91.4%);
-  border-radius: 8px;
-  font-size: 14px;
-  color: hsl(222.2, 47.4%, 11.2%);
-  background: white;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 100px;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-
-.form-textarea:focus {
-  outline: none;
-  border-color: hsl(221.2, 83.2%, 53.3%);
-}
-
-.form-textarea::placeholder {
-  color: hsl(215.4, 16.3%, 65%);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.form-row .form-group {
-  margin-bottom: 0;
-}
-
-.required {
-  color: hsl(0, 72.2%, 50.6%);
 }
 
 .photo-toggle {
@@ -607,73 +508,7 @@ tbody tr:last-child td { border-bottom: 0; }
   color: hsl(221.2, 83.2%, 53.3%);
 }
 
-.toggle-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 4px 0;
-}
-
-.toggle-label-section {
-  flex: 1;
-}
-
-.toggle-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: hsl(222.2, 47.4%, 11.2%);
-  margin-bottom: 2px;
-}
-
-.toggle-description {
-  font-size: 12px;
-  color: hsl(215.4, 16.3%, 46.9%);
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 26px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  inset: 0;
-  background: hsl(214.3, 31.8%, 80%);
-  border-radius: 26px;
-  transition: background 0.25s;
-}
-
-.toggle-slider::before {
-  content: "";
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  left: 3px;
-  bottom: 3px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.25s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background: hsl(221.2, 83.2%, 53.3%);
-}
-
-.toggle-switch input:checked + .toggle-slider::before {
-  transform: translateX(22px);
-}
+/* Toggle switch base styles live in shared.css */
 
 .featured-toggle-group {
   background: hsl(48, 100%, 97%);
@@ -693,37 +528,7 @@ tbody tr:last-child td { border-bottom: 0; }
   font-size: 16px;
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 24px;
-  border-top: 1px solid hsl(214.3, 31.8%, 91.4%);
-}
-
-.btn-secondary {
-  padding: 10px 20px;
-  background: white;
-  color: hsl(222.2, 47.4%, 11.2%);
-  border: 1px solid hsl(214.3, 31.8%, 91.4%);
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: hsl(210, 40%, 98%);
-  border-color: hsl(214.3, 31.8%, 80%);
-}
-
-@media (max-width: 768px) {
-  .modal {
-    width: 95%;
-    margin: 20px;
-  }
-}
+/* .btn-secondary and .modal-footer live in shared.css */
 
 /* ── Themed "discard draft?" confirmation dialog ─────────────────────────
    Styled with the site's own design tokens (CSS custom properties defined in

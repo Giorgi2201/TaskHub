@@ -55,8 +55,18 @@
       </button>
     </div>
 
+    <!-- Loading state -->
+    <div class="tab-content" *ngIf="loading">
+      <div class="content-panel">
+        <div class="tab-loading">
+          <div class="loading-spinner"></div>
+          <p>იტვირთება...</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Users Tab -->
-    <div class="tab-content" *ngIf="activeTab === 'users'">
+    <div class="tab-content" *ngIf="!loading && activeTab === 'users'">
       <div class="content-panel">
         <div class="panel-header">
           <div class="panel-title-section">
@@ -120,7 +130,7 @@
     </div>
 
     <!-- News Tab -->
-    <div class="tab-content" *ngIf="activeTab === 'news'">
+    <div class="tab-content" *ngIf="!loading && activeTab === 'news'">
       <div class="content-panel">
         <div class="panel-header">
           <div class="panel-title-section">
@@ -176,7 +186,7 @@
     </div>
 
     <!-- Vacancies Tab -->
-    <div class="tab-content" *ngIf="activeTab === 'vacancies'">
+    <div class="tab-content" *ngIf="!loading && activeTab === 'vacancies'">
       <div class="content-panel">
         <div class="panel-header">
           <div class="panel-title-section">
@@ -251,7 +261,7 @@
       </div>
     </div>
     <!-- Digest Tab -->
-    <div class="tab-content" *ngIf="activeTab === 'digest'">
+    <div class="tab-content" *ngIf="!loading && activeTab === 'digest'">
       <div class="content-panel">
         <div class="panel-header">
           <div class="panel-title-section">

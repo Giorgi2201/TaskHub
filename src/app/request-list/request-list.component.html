@@ -57,8 +57,16 @@
       </button>
     </div>
 
+    <!-- Loading state -->
+    <div class="table-container" *ngIf="loading">
+      <div class="list-loading">
+        <div class="loading-spinner"></div>
+        <p>მოთხოვნები იტვირთება...</p>
+      </div>
+    </div>
+
     <!-- Requests Table -->
-    <div class="table-container">
+    <div class="table-container" *ngIf="!loading">
       <table class="requests-table">
         <thead>
           <tr>

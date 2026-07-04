@@ -71,13 +71,15 @@
 
       <div class="right">
         <div class="user-dropdown-wrapper">
-          <button class="user" type="button" aria-label="User menu" (click)="toggleUserDropdown()">
+          <button class="user-btn" type="button" aria-label="User menu" (click)="toggleUserDropdown()">
             <div class="avatar">{{ getCurrentUser().initials }}</div>
             <div class="user-meta">
-              <p class="name">{{ getCurrentUser().name }}</p>
-              <p class="title" [ngClass]="getRoleClass()">{{ getCurrentUser().role }}</p>
+              <span class="name">{{ getCurrentUser().name }}</span>
+              <span class="title" [ngClass]="getRoleClass()">{{ getCurrentUser().role }}</span>
             </div>
-            <span style="opacity:.6;">▾</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </button>
 
           <div class="user-dropdown" *ngIf="userDropdownOpen">
@@ -105,7 +107,7 @@
   <div class="mobile-nav" aria-label="Mobile">
     <a routerLink="/dashboard" routerLinkActive="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-      <span>Dashboard</span>
+      <span>მთავარი</span>
     </a>
     <a routerLink="/requests" routerLinkActive="active">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
@@ -297,5 +299,43 @@
   <div class="modal-footer">
     <button class="btn-secondary" (click)="draftService.closeAndDiscard()">გაუქმება</button>
     <button class="btn-primary" (click)="draftService.saveDigestEntry()">{{ (draftService.isEditMode$ | async) ? 'შენახვა' : 'დამატება' }}</button>
+  </div>
+</div>
+
+<!-- ─── Toast notifications ──────────────────────────────────────────── -->
+<div class="toast-container" *ngIf="(toastService.toasts$ | async)?.length">
+  <div
+    *ngFor="let toast of (toastService.toasts$ | async)"
+    class="toast"
+    [ngClass]="'toast-' + toast.type"
+    (click)="toastService.dismiss(toast.id)">
+    <div class="toast-icon">
+      <svg *ngIf="toast.type === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <svg *ngIf="toast.type === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <line x1="9" y1="9" x2="15" y2="15"/>
+      </svg>
+      <svg *ngIf="toast.type === 'warning'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <svg *ngIf="toast.type === 'info'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    </div>
+    <span class="toast-message">{{ toast.message }}</span>
+    <button class="toast-close" (click)="toastService.dismiss(toast.id); $event.stopPropagation()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
   </div>
 </div>

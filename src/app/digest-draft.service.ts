@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
+import { ToastService } from './toast.service';
 
 // Shape of the digest create/edit form. Mirrors the real digest entry fields plus
 // bookkeeping (`digestEntryID`/`authorName`/`createdAt`) so a `DigestEntry` list item
@@ -92,7 +93,8 @@ export class DigestDraftService {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) {}
 
   get isMinimized(): boolean { return this.minimizedSubject.value; }
@@ -284,7 +286,7 @@ export class DigestDraftService {
   saveDigestEntry(): void {
     const data = this.formDataSubject.value;
     if (!data.title || !data.description || !data.periodFrom || !data.periodTo) {
-      alert('გთხოვთ შეავსოთ სავალდებულო ველები');
+      this.toastService.showWarning('გთხოვთ შეავსოთ სავალდებულო ველები');
       return;
     }
 
@@ -301,12 +303,12 @@ export class DigestDraftService {
         isActive: data.isActive
       };
       this.userService.updateDigestEntry(data.digestEntryID, updateData).subscribe({
-        next: () => { this.closeAndDiscard(); this.savedSubject.next(); },
-        error: (error) => { console.error('Error updating digest entry:', error); alert('შეცდომა ჩანაწერის განახლებისას'); }
+        next: () => { this.closeAndDiscard(); this.savedSubject.next(); this.toastService.showSuccess('ჩანაწერი განახლდა'); },
+        error: () => { this.toastService.showError('შეცდომა ჩანაწერის განახლებისას'); }
       });
     } else {
       const currentUser = this.authService.getCurrentUser();
-      if (!currentUser) { alert('მომხმარებელი არ არის ავტორიზებული'); return; }
+      if (!currentUser) { this.toastService.showError('მომხმარებელი არ არის ავტორიზებული'); return; }
 
       const createData = {
         title: data.title,
@@ -321,8 +323,8 @@ export class DigestDraftService {
         authorID: currentUser.userId
       };
       this.userService.createDigestEntry(createData).subscribe({
-        next: () => { this.closeAndDiscard(); this.savedSubject.next(); },
-        error: (error) => { console.error('Error creating digest entry:', error); alert('შეცდომა ჩანაწერის შექმნისას'); }
+        next: () => { this.closeAndDiscard(); this.savedSubject.next(); this.toastService.showSuccess('ჩანაწერი დაემატა'); },
+        error: () => { this.toastService.showError('შეცდომა ჩანაწერის შექმნისას'); }
       });
     }
   }

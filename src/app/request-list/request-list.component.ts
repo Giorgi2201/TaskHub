@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RequestService, Request } from '../request.service';
 import { UserService } from '../user.service';
+import { ToastService } from '../toast.service';
 
 @Component({
   selector: 'app-request-list',
@@ -14,6 +15,7 @@ import { UserService } from '../user.service';
 })
 export class RequestListComponent implements OnInit {
   requests: Request[] = [];
+  loading = true;
   searchTerm = '';
   
   currentPage = 1;
@@ -49,7 +51,8 @@ export class RequestListComponent implements OnInit {
   constructor(
     private router: Router, 
     private requestService: RequestService,
-    private userService: UserService
+    private userService: UserService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -74,9 +77,10 @@ export class RequestListComponent implements OnInit {
   }
 
   loadRequests() {
+    this.loading = true;
     this.requestService.getRequests().subscribe({
-      next: (data) => this.requests = data,
-      error: (err) => console.error(err)
+      next: (data) => { this.requests = data; this.loading = false; },
+      error: (err) => { console.error(err); this.loading = false; }
     });
   }
 
@@ -218,7 +222,7 @@ export class RequestListComponent implements OnInit {
     if (!this.selectedRequest) return;
     
     if (!this.selectedStatusId) {
-      alert('გთხოვთ აირჩიოთ სტატუსი');
+      this.toastService.showWarning('გთხოვთ აირჩიოთ სტატუსი');
       return;
     }
 
@@ -234,8 +238,9 @@ export class RequestListComponent implements OnInit {
       next: () => {
         this.closeEditModal();
         this.loadRequests();
+        this.toastService.showSuccess('მოთხოვნა განახლდა');
       },
-      error: (err) => console.error('Error updating request:', err)
+      error: (err) => { console.error('Error updating request:', err); this.toastService.showError('მოთხოვნის განახლება ვერ მოხერხდა'); }
     });
   }
 
