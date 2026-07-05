@@ -135,8 +135,19 @@ export class DigestDraftService {
     this.modalOpenSubject.next(true);
   }
 
-  // Open the modal to edit an existing entry. Same minimized-draft guard as add.
+  // Open the modal to edit an existing entry. Same minimized-draft guard as add,
+  // unless the user is re-editing the SAME entry that is already minimized — in
+  // that case just restore the modal as-is without a warning or data overwrite,
+  // preserving whatever the user had typed before they minimized.
   async openEditDigestModal(entry: DigestFormData): Promise<void> {
+    // If a draft is minimized and it corresponds to the exact same digest entry,
+    // just reopen/restore it — no point warning about losing a draft the user is
+    // deliberately coming back to. This prevents a false "you'll lose your draft"
+    // dialog when clicking "Edit" on the same table row a second time.
+    if (this.isMinimized && this.formData.digestEntryID === entry.digestEntryID && this.formData.digestEntryID !== 0) {
+      this.restore();
+      return;
+    }
     if (!(await this.confirmDiscardMinimizedDraft())) return;
     this.editModeSubject.next(true);
     this.formDataSubject.next({ ...entry });
