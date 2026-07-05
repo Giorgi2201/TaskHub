@@ -83,7 +83,7 @@
           </button>
 
           <div class="user-dropdown" *ngIf="userDropdownOpen">
-            <button class="user-dropdown-item" type="button">
+            <button class="user-dropdown-item" type="button" (click)="openProfileModal()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
@@ -143,6 +143,94 @@
     </a>
   </div>
 </header>
+
+<!-- ─── Profile Modal ──────────────────────────────────────────────── -->
+<div class="modal-backdrop" *ngIf="profileModalOpen" (click)="closeProfileModal()"></div>
+<div class="modal profile-modal" *ngIf="profileModalOpen">
+  <div class="modal-header">
+    <h2 class="modal-title">პროფილი</h2>
+    <button class="modal-close" (click)="closeProfileModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p class="profile-placeholder" *ngIf="profileLoading">იტვირთება...</p>
+
+    <ng-container *ngIf="!profileLoading && profile">
+      <h3 class="profile-name">{{ profile.name }}</h3>
+
+      <div class="form-group">
+        <label for="profileEmail">ელ-ფოსტა</label>
+        <input type="text" id="profileEmail" class="form-input" [value]="profile.email" disabled/>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="profileTitle">თანამდებობა</label>
+          <input type="text" id="profileTitle" class="form-input" [value]="profile.title" disabled/>
+        </div>
+        <div class="form-group">
+          <label for="profileDepartment">დეპარტამენტი</label>
+          <input type="text" id="profileDepartment" class="form-input" [value]="profile.department" disabled/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="profileRole">როლი</label>
+        <input type="text" id="profileRole" class="form-input" [value]="profile.role" disabled/>
+      </div>
+
+      <hr class="profile-divider"/>
+
+      <h3 class="profile-section-title">პაროლის შეცვლა</h3>
+
+      <div class="form-group">
+        <label for="oldPassword">მიმდინარე პაროლი <span class="required">*</span></label>
+        <input
+          type="password"
+          id="oldPassword"
+          class="form-input"
+          [class.has-error]="passwordErrors.oldPassword"
+          [(ngModel)]="passwordForm.oldPassword"
+          placeholder="შეიყვანეთ მიმდინარე პაროლი"/>
+        <span class="field-error" *ngIf="passwordErrors.oldPassword">{{ passwordErrors.oldPassword }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="newPassword">ახალი პაროლი <span class="required">*</span></label>
+        <input
+          type="password"
+          id="newPassword"
+          class="form-input"
+          [class.has-error]="passwordErrors.newPassword"
+          [(ngModel)]="passwordForm.newPassword"
+          placeholder="მინიმუმ 8 სიმბოლო"/>
+        <span class="field-error" *ngIf="passwordErrors.newPassword">{{ passwordErrors.newPassword }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmNewPassword">გაიმეორეთ ახალი პაროლი <span class="required">*</span></label>
+        <input
+          type="password"
+          id="confirmNewPassword"
+          class="form-input"
+          [class.has-error]="passwordErrors.confirmNewPassword"
+          [(ngModel)]="passwordForm.confirmNewPassword"
+          placeholder="გაიმეორეთ ახალი პაროლი"/>
+        <span class="field-error" *ngIf="passwordErrors.confirmNewPassword">{{ passwordErrors.confirmNewPassword }}</span>
+      </div>
+    </ng-container>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-secondary" (click)="closeProfileModal()">დახურვა</button>
+    <button class="btn-primary" (click)="savePassword()" [disabled]="passwordSaving || profileLoading">
+      {{ passwordSaving ? 'ინახება...' : 'შენახვა' }}
+    </button>
+  </div>
+</div>
 
 <router-outlet />
 

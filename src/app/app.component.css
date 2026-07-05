@@ -435,11 +435,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .table-wrap { overflow: auto; }
 .table-wrap table { min-width: 860px; }
 
-/* ── Global digest draft modal ───────────────────────────────────────────
-   Modal base styles (modal-backdrop, modal, modal-header, modal-title,
-   modal-close, modal-body, modal-footer, form-group, form-input, 
-   form-textarea, form-row, required) now live in shared.css.             
-   Only digest-specific additions remain here.                           */
+/* Global digest draft modal. Base modal/form styles live in shared.css. */
 
 .digest-modal {
   max-height: 90vh;
@@ -690,6 +686,32 @@ tbody tr:last-child td { border-bottom: 0; }
   border-radius: 50%;
   background: hsl(24.6, 95%, 53%);
   border: 2px solid white;
+}
+
+.profile-modal {
+  max-width: 480px;
+}
+
+.profile-placeholder {
+  text-align: center;
+  font-size: 15px;
+  color: hsl(215.4, 16.3%, 46.9%);
+  padding: 32px 16px;
+  margin: 0;
+}
+
+.profile-name, .profile-section-title {
+  font-weight: 700;
+  color: hsl(222.2, 47.4%, 11.2%);
+  margin: 0 0 16px;
+}
+.profile-name { font-size: 19px; margin-bottom: 20px; }
+.profile-section-title { font-size: 15px; }
+
+.profile-divider {
+  border: none;
+  border-top: 1px solid hsl(214.3, 31.8%, 91.4%);
+  margin: 8px 0 20px;
 }
 
 @keyframes digest-bubble-in {

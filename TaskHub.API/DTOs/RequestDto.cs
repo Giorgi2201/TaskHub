@@ -158,6 +158,25 @@ namespace TaskHub.API.DTOs
         public string Role { get; set; } = string.Empty;
     }
 
+    // Read-only profile info shown on the profile page. Deliberately excludes
+    // Password and anything editable — the frontend only ever displays these
+    // as disabled fields.
+    public class ProfileDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+    }
+
+    public class ChangePasswordDto
+    {
+        public string OldPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+
     public class NewsDto
     {
         public int NewsID { get; set; }

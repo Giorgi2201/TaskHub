@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TaskHub.API.Data;
+using TaskHub.API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,11 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<TaskHubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Password hashing utility (from Microsoft.AspNetCore.Identity) used by
+// AuthController/UsersController/ProfileController. We only use the hasher
+// itself, not the full Identity membership system.
+builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddCors(options =>
 {
@@ -49,6 +56,11 @@ using (var scope = app.Services.CreateScope())
     }
 
     dbContext.Database.Migrate();
+
+    // One-time (idempotent) data fix: hash any plaintext passwords still left
+    // over from before password hashing was introduced. See PasswordMigration
+    // for full details on why this is safe to run on every startup.
+    PasswordMigration.HashPlaintextPasswords(dbContext);
 }
 
 if (app.Environment.IsDevelopment())

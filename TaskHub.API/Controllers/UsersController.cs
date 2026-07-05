@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskHub.API.Data;
@@ -11,10 +12,12 @@ namespace TaskHub.API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly TaskHubDbContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public UsersController(TaskHubDbContext context)
+        public UsersController(TaskHubDbContext context, IPasswordHasher<User> passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
         // GET: api/users
@@ -90,7 +93,6 @@ namespace TaskHub.API.Controllers
             {
                 Name = createDto.Name,
                 Email = createDto.Email,
-                Password = password,
                 Phone = phone,
                 Role = createDto.Role,
                 Department = createDto.Department,
@@ -98,6 +100,8 @@ namespace TaskHub.API.Controllers
                 Initials = initials.ToUpper(),
                 AvatarClass = avatarClass
             };
+            // Hash before storing — never persist the generated plaintext password.
+            user.Password = _passwordHasher.HashPassword(user, password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
