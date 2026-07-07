@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import { AuthService } from '../auth.service';
-import { DigestDraftService } from '../digest-draft.service';
+import { DraftService, ModuleType } from '../draft.service';
 import { ToastService } from '../toast.service';
 import { Subscription } from 'rxjs';
 
@@ -83,49 +83,26 @@ export class AdminComponent implements OnInit, OnDestroy {
     title: ''
   };
 
-  newsFormData: NewsItem = {
-    newsID: 0,
-    title: '',
-    content: '',
-    imageUrl: '',
-    authorName: '',
-    createdAt: ''
-  };
+  // News/Vacancy form state (formerly `newsFormData`/`vacancyFormData` local
+  // fields here) now lives in DraftService, same as digest - see
+  // `draftService.getFormData('news'|'vacancy')` and the modals rendered
+  // globally in AppComponent. Only the Users form stays local to this
+  // component, since Users is explicitly excluded from the draft feature.
 
-  vacancyFormData: VacancyItem = {
-    vacancyID: 0,
-    title: '',
-    category: '',
-    department: '',
-    location: '',
-    description: '',
-    deadline: '',
-    isActive: true,
-    authorName: '',
-    createdAt: ''
-  };
-
-  vacancyCategories = ['ღია საჯარო კონკურსი', 'შიდა კონკურსი', 'სააპლიკაციო ფორმა'];
   roles = ['შემვსები', 'ხელმძღვანელი', 'შემსრულებელი', 'ადმინისტრატორი'];
 
-  // Subscription to "digest entry saved" events from the shared draft service, so
-  // this list stays in sync even though the save action is now triggered from the
-  // globally-rendered digest modal (owned by DigestDraftService) rather than here.
-  private digestSavedSubscription?: Subscription;
-
-  get minDeadlineDate(): string {
-    const now = new Date();
-    now.setSeconds(0, 0);
-    return now.toISOString().slice(0, 16);
-  }
+  // Subscription to "entry saved" events from the shared draft service, so
+  // these lists stay in sync even though the save action is now triggered from
+  // the globally-rendered modals (owned by DraftService) rather than here.
+  private draftSavedSubscription?: Subscription;
 
   constructor(
     private userService: UserService,
     private router: Router,
     private authService: AuthService,
-    // Public: the template calls draftService.openAddDigestModal()/openEditDigestModal()
-    // directly, since the digest modal itself is now owned and rendered by AppComponent.
-    public draftService: DigestDraftService,
+    // Public: the template calls draftService.openDraftModal(moduleType, ...) directly
+    // for Digest/Vacancy/News, since those modals are now owned and rendered by AppComponent.
+    public draftService: DraftService,
     private toastService: ToastService
   ) {}
 
@@ -142,17 +119,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.loadVacancies();
     this.loadDigestEntries();
 
-    // Refresh the entries list whenever a digest entry is created/updated via the
-    // globally-rendered modal (the save action no longer necessarily happens while
-    // this component is even mounted, so we can't rely on a local callback).
-    this.digestSavedSubscription = this.draftService.digestSaved$.subscribe(() => {
-      this.loadDigestEntries();
+    // Refresh the relevant list whenever ANY module's entry is created/updated
+    // via its globally-rendered modal (the save action no longer necessarily
+    // happens while this component is even mounted, so we can't rely on a
+    // local callback). `saved$` itself is fully generic - which local list to
+    // reload per moduleType is the only module-specific bit, and that's
+    // inherent to AdminComponent owning three separate list/loader pairs.
+    this.draftSavedSubscription = this.draftService.saved$.subscribe((moduleType: ModuleType) => {
+      if (moduleType === 'digest') this.loadDigestEntries();
+      else if (moduleType === 'vacancy') this.loadVacancies();
+      else if (moduleType === 'news') this.loadNews();
     });
   }
 
   ngOnDestroy(): void {
     this.userSubscription?.unsubscribe();
-    this.digestSavedSubscription?.unsubscribe();
+    this.draftSavedSubscription?.unsubscribe();
   }
 
   private decrementLoad(): void {
@@ -231,19 +213,17 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.modalOpen = true;
   }
 
+  // `modalOpen`/`isEditMode`/`closeModal` now only govern the Users modal -
+  // Digest/Vacancy/News modals are owned by DraftService and have their own
+  // per-module state (see AppComponent).
   closeModal(): void {
     this.modalOpen = false;
     this.formData = { userID: 0, name: '', role: '', department: '', email: '', title: '' };
-    this.newsFormData = { newsID: 0, title: '', content: '', imageUrl: '', authorName: '', createdAt: '' };
-    this.vacancyFormData = {
-      vacancyID: 0, title: '', category: '', department: '',
-      location: '', description: '', deadline: '', isActive: true,
-      authorName: '', createdAt: ''
-    };
   }
 
-  // Note: Escape-to-close for the digest modal is handled by AppComponent, since
-  // that modal is no longer part of this component's `modalOpen` state.
+  // Note: Escape-to-close for the Digest/Vacancy/News modals is handled by
+  // AppComponent, since those modals are no longer part of this component's
+  // `modalOpen` state.
   @HostListener('document:keydown.escape', ['$event'])
   handleEscape(event: any): void {
     if (this.modalOpen) {
@@ -280,50 +260,10 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  openAddNewsModal(): void {
-    this.isEditMode = false;
-    this.newsFormData = { newsID: 0, title: '', content: '', imageUrl: '', authorName: '', createdAt: '' };
-    this.modalOpen = true;
-  }
-
-  openEditNewsModal(newsItem: NewsItem): void {
-    this.isEditMode = true;
-    this.newsFormData = { ...newsItem };
-    this.modalOpen = true;
-  }
-
-  saveNews(): void {
-    if (!this.newsFormData.title || !this.newsFormData.content) {
-      this.toastService.showWarning('გთხოვთ შეავსოთ სავალდებულო ველები');
-      return;
-    }
-
-    if (this.isEditMode) {
-      const updateData = {
-        title: this.newsFormData.title,
-        content: this.newsFormData.content,
-        imageUrl: this.newsFormData.imageUrl || null
-      };
-      this.userService.updateNews(this.newsFormData.newsID, updateData).subscribe({
-        next: () => { this.loadNews(); this.closeModal(); this.toastService.showSuccess('სიახლე განახლდა'); },
-        error: () => { this.toastService.showError('შეცდომა სიახლის განახლებისას'); }
-      });
-    } else {
-      const currentUser = this.authService.getCurrentUser();
-      if (!currentUser) { this.toastService.showError('მომხმარებელი არ არის ავტორიზებული'); return; }
-
-      const createData = {
-        title: this.newsFormData.title,
-        content: this.newsFormData.content,
-        imageUrl: this.newsFormData.imageUrl || null,
-        authorID: currentUser.userId
-      };
-      this.userService.createNews(createData).subscribe({
-        next: () => { this.loadNews(); this.closeModal(); this.toastService.showSuccess('სიახლე დაემატა'); },
-        error: () => { this.toastService.showError('შეცდომა სიახლის შექმნისას'); }
-      });
-    }
-  }
+  // Adding/editing a news item now opens the app-wide modal owned by
+  // DraftService (rendered in AppComponent, outside <router-outlet>), same
+  // as digest - see draftService.openDraftModal('news', ...) call sites in
+  // the template.
 
   deleteNews(newsId: number): void {
     if (confirm('ნამდვილად გსურთ სიახლის წაშლა?')) {
@@ -334,44 +274,10 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
-  openAddVacancyModal(): void {
-    this.isEditMode = false;
-    this.vacancyFormData = {
-      vacancyID: 0, title: '', category: '', department: '',
-      location: '', description: '', deadline: '', isActive: true,
-      authorName: '', createdAt: ''
-    };
-    this.modalOpen = true;
-  }
-
-  openEditVacancyModal(vacancy: VacancyItem): void {
-    this.isEditMode = true;
-    this.vacancyFormData = { ...vacancy };
-    this.modalOpen = true;
-  }
-
-  saveVacancy(): void {
-    if (!this.vacancyFormData.title || !this.vacancyFormData.category || !this.vacancyFormData.description) {
-      this.toastService.showWarning('გთხოვთ შეავსოთ სავალდებულო ველები');
-      return;
-    }
-
-    if (this.isEditMode) {
-      this.userService.updateVacancy(this.vacancyFormData.vacancyID, this.vacancyFormData).subscribe({
-        next: () => { this.loadVacancies(); this.closeModal(); this.toastService.showSuccess('ვაკანსია განახლდა'); },
-        error: () => { this.toastService.showError('შეცდომა ვაკანსიის განახლებისას'); }
-      });
-    } else {
-      const currentUser = this.authService.getCurrentUser();
-      if (!currentUser) { this.toastService.showError('მომხმარებელი არ არის ავტორიზებული'); return; }
-
-      const createData = { ...this.vacancyFormData, authorID: currentUser.userId };
-      this.userService.createVacancy(createData).subscribe({
-        next: () => { this.loadVacancies(); this.closeModal(); this.toastService.showSuccess('ვაკანსია დაემატა'); },
-        error: () => { this.toastService.showError('შეცდომა ვაკანსიის შექმნისას'); }
-      });
-    }
-  }
+  // Adding/editing a vacancy now opens the app-wide modal owned by
+  // DraftService (rendered in AppComponent, outside <router-outlet>), same
+  // as digest - see draftService.openDraftModal('vacancy', ...) call sites
+  // in the template.
 
   deleteVacancy(vacancyId: number): void {
     if (confirm('ნამდვილად გსურთ ვაკანსიის წაშლა?')) {
@@ -383,7 +289,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   // Adding/editing a digest entry now opens the app-wide modal owned by
-  // DigestDraftService (rendered in AppComponent, outside <router-outlet>), so it
+  // DraftService (rendered in AppComponent, outside <router-outlet>), so it
   // stays interactive across every route rather than being tied to this page.
   // The (single-minimized-draft) confirmation guard lives in the service too.
 

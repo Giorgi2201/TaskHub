@@ -137,7 +137,7 @@
             <h2 class="panel-title">სიახლეების მართვა</h2>
             <p class="panel-subtitle">სულ: {{ news.length }} სიახლე</p>
           </div>
-          <button class="btn-primary" (click)="openAddNewsModal()">
+          <button class="btn-primary" (click)="draftService.openDraftModal('news', null)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 5v14"/>
               <path d="M5 12h14"/>
@@ -164,7 +164,7 @@
                 <td>{{ newsItem.authorName }}</td>
                 <td>{{ newsItem.createdAt }}</td>
                 <td class="actions-cell">
-                  <button class="action-btn edit-btn" (click)="openEditNewsModal(newsItem)" title="რედაქტირება">
+                  <button class="action-btn edit-btn" (click)="draftService.openDraftModal('news', newsItem)" title="რედაქტირება">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -193,7 +193,7 @@
             <h2 class="panel-title">ვაკანსიების მართვა</h2>
             <p class="panel-subtitle">სულ: {{ vacancies.length }} ვაკანსია</p>
           </div>
-          <button class="btn-primary" (click)="openAddVacancyModal()">
+          <button class="btn-primary" (click)="draftService.openDraftModal('vacancy', null)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 5v14"/>
               <path d="M5 12h14"/>
@@ -240,7 +240,7 @@
                   </div>
                 </td>
                 <td class="actions-cell">
-                  <button class="action-btn edit-btn" (click)="openEditVacancyModal(vacancy)" title="რედაქტირება">
+                  <button class="action-btn edit-btn" (click)="draftService.openDraftModal('vacancy', vacancy)" title="რედაქტირება">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -268,7 +268,7 @@
             <h2 class="panel-title">დაიჯესტის მართვა</h2>
             <p class="panel-subtitle">სულ: {{ digestEntries.length }} ჩანაწერი</p>
           </div>
-          <button class="btn-primary" (click)="draftService.openAddDigestModal()">
+          <button class="btn-primary" (click)="draftService.openDraftModal('digest', null)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 5v14"/>
               <path d="M5 12h14"/>
@@ -323,7 +323,7 @@
                   </div>
                 </td>
                 <td class="actions-cell">
-                  <button class="action-btn edit-btn" (click)="draftService.openEditDigestModal(entry)" title="რედაქტირება">
+                  <button class="action-btn edit-btn" (click)="draftService.openDraftModal('digest', entry)" title="რედაქტირება">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -391,114 +391,9 @@
   </div>
 </div>
 
-<!-- Add/Edit News Modal -->
-<div class="modal-backdrop" *ngIf="modalOpen && activeTab === 'news'" (click)="closeModal()"></div>
-<div class="modal" *ngIf="modalOpen && activeTab === 'news'">
-  <div class="modal-header">
-    <h2 class="modal-title">{{ isEditMode ? 'სიახლის რედაქტირება' : 'სიახლის დამატება' }}</h2>
-    <button class="modal-close" (click)="closeModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  </div>
-
-  <div class="modal-body">
-    <div class="form-group">
-      <label for="newsTitle">სათაური</label>
-      <input type="text" id="newsTitle" [(ngModel)]="newsFormData.title" placeholder="შეიყვანეთ სიახლის სათაური" class="form-input"/>
-    </div>
-    <div class="form-group">
-      <label for="newsContent">შინაარსი</label>
-      <textarea id="newsContent" [(ngModel)]="newsFormData.content" placeholder="შეიყვანეთ სიახლის ტექსტი" class="form-textarea" rows="5"></textarea>
-    </div>
-    <div class="form-group">
-      <label for="newsImageUrl">სურათის URL (არასავალდებულო)</label>
-      <input type="text" id="newsImageUrl" [(ngModel)]="newsFormData.imageUrl" placeholder="https://example.com/image.jpg" class="form-input"/>
-    </div>
-  </div>
-
-  <div class="modal-footer">
-    <button class="btn-secondary" (click)="closeModal()">გაუქმება</button>
-    <button class="btn-primary" (click)="saveNews()">{{ isEditMode ? 'შენახვა' : 'დამატება' }}</button>
-  </div>
-</div>
-
-<!-- The digest create/edit modal is intentionally NOT rendered here. It's owned by
-     DigestDraftService and rendered globally in AppComponent (outside the router
-     outlet) so the minimized bubble/modal stay usable across every page. -->
-
-<!-- Add/Edit Vacancy Modal -->
-<div class="modal-backdrop" *ngIf="modalOpen && activeTab === 'vacancies'" (click)="closeModal()"></div>
-<div class="modal" *ngIf="modalOpen && activeTab === 'vacancies'">
-  <div class="modal-header">
-    <h2 class="modal-title">{{ isEditMode ? 'ვაკანსიის რედაქტირება' : 'ახალი ვაკანსია' }}</h2>
-    <button class="modal-close" (click)="closeModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  </div>
-
-  <div class="modal-body">
-    <div class="form-group">
-      <label for="vacancyTitle">სათაური</label>
-      <input type="text" id="vacancyTitle" [(ngModel)]="vacancyFormData.title" placeholder="ვაკანსიის სათაური" class="form-input"/>
-    </div>
-
-    <div class="form-group">
-      <label for="vacancyCategory">კატეგორია</label>
-      <select id="vacancyCategory" [(ngModel)]="vacancyFormData.category" class="form-select">
-        <option value="">აირჩიეთ კატეგორია</option>
-        <option *ngFor="let cat of vacancyCategories" [value]="cat">{{ cat }}</option>
-      </select>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="vacancyDepartment">დეპარტამენტი</label>
-        <input type="text" id="vacancyDepartment" [(ngModel)]="vacancyFormData.department" placeholder="მაგ: IT დეპარტამენტი" class="form-input"/>
-      </div>
-      <div class="form-group">
-        <label for="vacancyLocation">ლოკაცია</label>
-        <input type="text" id="vacancyLocation" [(ngModel)]="vacancyFormData.location" placeholder="მაგ: თბილისი" class="form-input"/>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="vacancyDescription">აღწერა</label>
-      <textarea id="vacancyDescription" [(ngModel)]="vacancyFormData.description" placeholder="ვაკანსიის აღწერა..." class="form-textarea" rows="4"></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="vacancyPosition"># პოზიცია</label>
-        <input type="text" id="vacancyPosition" value="" placeholder="ავტომატური" class="form-input" disabled/>
-      </div>
-      <div class="form-group">
-        <label for="vacancyDeadline">ვადა</label>
-        <input type="datetime-local" id="vacancyDeadline" [(ngModel)]="vacancyFormData.deadline" [min]="minDeadlineDate" class="form-input"/>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <div class="toggle-group">
-        <div class="toggle-label-section">
-          <div class="toggle-label">აქტიური ვაკანსია</div>
-          <div class="toggle-description">გამოუქვეყნებელი ვაკანსია საიტზე არ გამოჩნდება</div>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" [(ngModel)]="vacancyFormData.isActive"/>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-footer">
-    <button class="btn-secondary" (click)="closeModal()">გაუქმება</button>
-    <button class="btn-primary" (click)="saveVacancy()">{{ isEditMode ? 'შენახვა' : 'დამატება' }}</button>
-  </div>
-</div>
+<!-- The Digest, Vacancy, and News create/edit modals are intentionally NOT
+     rendered here. They're owned by DraftService and rendered globally in
+     AppComponent (outside the router outlet) so their minimized bubble/modal
+     stay usable across every page, not just while on this admin page. Only
+     the Users modal above stays local to this component - Users has no
+     draft/minimize support by design. -->

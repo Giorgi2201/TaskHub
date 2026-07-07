@@ -6,7 +6,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { filter } from 'rxjs';
 import { UserService, CurrentUser } from './user.service';
 import { AuthService } from './auth.service';
-import { DigestDraftService } from './digest-draft.service';
+import { DraftService, ModuleType, VACANCY_CATEGORIES } from './draft.service';
 import { ToastService } from './toast.service';
 import { ProfileService, ProfileInfo } from './profile.service';
 
@@ -43,12 +43,40 @@ export class AppComponent implements OnInit {
   passwordErrors: PasswordFormErrors = {};
   passwordSaving = false;
 
+  // ── Minimized-drafts bubble state ───────────────────────────────────
+  // Whether the expanded list of minimized drafts (one row per module with
+  // an active draft) is showing above the collapsed icon+count bubble.
+  // The list of drafts itself is NOT duplicated here - it's read straight
+  // from `draftService.minimizedDrafts$` in the template, so this component
+  // never needs to know which module types exist.
+  draftBubbleExpanded = false;
+
+  // Short display label per module, purely for the row badge in the
+  // expanded drafts list - not branching logic, just presentation text.
+  readonly draftModuleLabels: Record<ModuleType, string> = {
+    digest: 'დაიჯესტი',
+    vacancy: 'ვაკანსია',
+    news: 'სიახლე'
+  };
+
+  // ── Vacancy modal support data ──────────────────────────────────────
+  // The vacancy modal now renders here (globally), same as digest, so its
+  // supporting data (category options, the deadline input's minimum) moved
+  // here from AdminComponent alongside it.
+  readonly vacancyCategories = VACANCY_CATEGORIES;
+
+  get minDeadlineDate(): string {
+    const now = new Date();
+    now.setSeconds(0, 0);
+    return now.toISOString().slice(0, 16);
+  }
+
   constructor(
     private userService: UserService,
     private authService: AuthService,
     private router: Router,
     private profileService: ProfileService,
-    public draftService: DigestDraftService,
+    public draftService: DraftService,
     public toastService: ToastService
   ) {
     // Hide header on login page
@@ -65,8 +93,9 @@ export class AppComponent implements OnInit {
         // Sync with UserService
         this.userService.setUserByRole(user.role);
         this.currentUserRole = user.role;
-        // Load any minimized digest draft so the global bubble reappears app-wide
-        // (including after a page refresh). Only admins can own a digest draft.
+        // Load any minimized drafts (digest/vacancy/news) so the global bubble
+        // reappears app-wide (including after a page refresh). Only admins
+        // can own a draft, since all three modules are admin-managed content.
         if (user.role === 'ადმინისტრატორი') {
           this.draftService.init(user.userId);
         }
@@ -227,6 +256,19 @@ export class AppComponent implements OnInit {
     });
   }
 
+  // Toggle the expanded drafts list. Called by the collapsed bubble itself.
+  toggleDraftBubble(): void {
+    this.draftBubbleExpanded = !this.draftBubbleExpanded;
+  }
+
+  // Restore a specific minimized draft (any module) and collapse the panel -
+  // generic over `moduleType`, so adding a new module here later needs no
+  // changes to this component.
+  restoreDraft(moduleType: ModuleType): void {
+    this.draftService.restore(moduleType);
+    this.draftBubbleExpanded = false;
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -235,20 +277,28 @@ export class AppComponent implements OnInit {
     if (!userDropdown && this.userDropdownOpen) {
       this.userDropdownOpen = false;
     }
+
+    const draftBubbleWrapper = target.closest('.draft-bubble-wrapper');
+    if (!draftBubbleWrapper && this.draftBubbleExpanded) {
+      this.draftBubbleExpanded = false;
+    }
   }
 
-  // Escape closes the globally-rendered digest modal (or, if the themed
-  // discard-draft confirmation is up, cancels that first). This is intentionally
-  // separate from AdminComponent's own Escape handler (which only covers the
-  // users/news/vacancies modals), since the digest modal no longer lives there.
+  // Escape closes whichever globally-rendered draft modal is currently open
+  // (digest/vacancy/news - via the generic `openModuleType`), or if the
+  // themed discard-draft confirmation is up, cancels that first. This is
+  // intentionally separate from AdminComponent's own Escape handler (which
+  // only covers the Users modal now), since these modals no longer live there.
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.profileModalOpen) {
       this.closeProfileModal();
     } else if (this.draftService.isConfirmDialogVisible) {
       this.draftService.resolveConfirmDialog(false);
-    } else if (this.draftService.isModalOpen) {
-      this.draftService.closeAndDiscard();
+    } else if (this.draftService.openModuleType) {
+      this.draftService.discardDraft(this.draftService.openModuleType);
+    } else if (this.draftBubbleExpanded) {
+      this.draftBubbleExpanded = false;
     }
   }
 }

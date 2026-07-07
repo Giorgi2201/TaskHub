@@ -282,36 +282,8 @@ namespace TaskHub.API.DTOs
         public bool IsActive { get; set; }
     }
 
-    // Returned when reading the current user's minimized digest draft.
-    public class DigestDraftDto
-    {
-        public int UserID { get; set; }
-        public string? Title { get; set; }
-        public string? Description { get; set; }
-        public string? ImageUrl { get; set; }
-        public string? SourceName { get; set; }
-        public string? SourceUrl { get; set; }
-        // Dates are serialized as yyyy-MM-dd (or null) to match the digest form inputs.
-        public string? PeriodFrom { get; set; }
-        public string? PeriodTo { get; set; }
-        public bool IsFeatured { get; set; }
-        public bool IsActive { get; set; }
-        public string LastUpdated { get; set; } = string.Empty;
-    }
-
-    // Sent by the client to upsert (create or overwrite) the current user's draft.
-    // All draft fields are optional because the draft may be partially filled.
-    public class SaveDigestDraftDto
-    {
-        public int UserID { get; set; }
-        public string? Title { get; set; }
-        public string? Description { get; set; }
-        public string? ImageUrl { get; set; }
-        public string? SourceName { get; set; }
-        public string? SourceUrl { get; set; }
-        public DateTime? PeriodFrom { get; set; }
-        public DateTime? PeriodTo { get; set; }
-        public bool IsFeatured { get; set; }
-        public bool IsActive { get; set; } = true;
-    }
+    // NOTE: the old DigestDraftDto/SaveDigestDraftDto (module-specific digest
+    // draft DTOs) were replaced by the generic DraftDto/SaveDraftDto in
+    // DTOs/DraftDto.cs, used by DraftsController for Digest, Vacancy, and News
+    // drafts alike.
 }

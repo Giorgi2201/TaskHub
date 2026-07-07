@@ -18,7 +18,7 @@ export interface ChangePasswordRequest {
 }
 
 // Thin HTTP wrapper only — no shared/global state needed here (unlike
-// DigestDraftService), since the profile modal doesn't need to persist across
+// DraftService), since the profile modal doesn't need to persist across
 // refreshes or be controlled from outside AppComponent.
 @Injectable({ providedIn: 'root' })
 export class ProfileService {

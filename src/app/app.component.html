@@ -238,8 +238,8 @@
      Global digest draft feature: bubble + create/edit modal.
      Rendered here (outside <router-outlet>, hidden on /login like the header)
      so they stay usable from ANY page with no navigation needed to reopen —
-     all state/logic is owned by DigestDraftService; this template just binds
-     to it. -->
+     all state/logic is owned by DraftService (scoped to the 'digest' module);
+     this template just binds to it. -->
 
 <!-- Themed "discard draft?" confirmation, replacing the native browser confirm()
      so it matches the site's own visual design (colors/typography/spacing). -->
@@ -260,37 +260,59 @@
   </div>
 </div>
 
-<!-- Floating chat-bubble shown while a draft is minimized. Clicking it restores
-     the full modal instantly (no route change). -->
-<button
-  class="digest-bubble"
-  *ngIf="showHeader && isAuthenticated && (draftService.digestModalMinimized$ | async)"
-  (click)="draftService.restore()"
-  title="დაიჯესტის დრაფტი — დაბრუნება">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-    <polyline points="14 2 14 8 20 8"/>
-    <line x1="16" y1="13" x2="8" y2="13"/>
-    <line x1="16" y1="17" x2="8" y2="17"/>
-    <line x1="10" y1="9" x2="8" y2="9"/>
-  </svg>
-  <span class="digest-bubble-title">{{ draftService.formData.title || 'დაიჯესტის დრაფტი' }}</span>
-  <span class="digest-bubble-dot"></span>
-</button>
+<!-- Global minimized-drafts bubble: one icon-only circular button for ALL
+     modules combined (digest/vacancy/news), showing a count badge, that
+     expands into a small list of every currently-minimized draft. Fully
+     generic over `draftService.minimizedDrafts$` - no module-specific
+     markup here, so adding a new draftable module needs no template changes. -->
+<ng-container *ngIf="showHeader && isAuthenticated && (draftService.minimizedDrafts$ | async) as minimizedDrafts">
+  <div class="draft-bubble-wrapper" *ngIf="minimizedDrafts.length > 0">
+    <!-- Expanded list, anchored above the bubble. -->
+    <div class="draft-panel" *ngIf="draftBubbleExpanded">
+      <div class="draft-panel-header">ჩაკეცილი დრაფტები</div>
+      <button
+        type="button"
+        class="draft-panel-row"
+        *ngFor="let draft of minimizedDrafts"
+        (click)="restoreDraft(draft.moduleType)">
+        <span class="draft-panel-module" [ngClass]="'draft-module-' + draft.moduleType">{{ draftModuleLabels[draft.moduleType] }}</span>
+        <span class="draft-panel-title">{{ draft.title || 'უსათაუროდ' }}</span>
+        <svg class="draft-panel-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Collapsed icon-only bubble with a total-count badge. -->
+    <button
+      class="draft-bubble"
+      (click)="toggleDraftBubble()"
+      title="ჩაკეცილი დრაფტები">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <line x1="10" y1="9" x2="8" y2="9"/>
+      </svg>
+      <span class="draft-bubble-badge">{{ minimizedDrafts.length }}</span>
+    </button>
+  </div>
+</ng-container>
 
 <!-- Digest create/edit modal itself. -->
-<div class="modal-backdrop" *ngIf="showHeader && isAuthenticated && (draftService.digestModalOpen$ | async)" (click)="draftService.closeAndDiscard()"></div>
+<div class="modal-backdrop" *ngIf="showHeader && isAuthenticated && (draftService.digestModalOpen$ | async)" (click)="draftService.discardDraft('digest')"></div>
 <div class="modal digest-modal" *ngIf="showHeader && isAuthenticated && (draftService.digestModalOpen$ | async)">
   <div class="modal-header">
     <h2 class="modal-title">{{ (draftService.isEditMode$ | async) ? 'დაიჯესტის რედაქტირება' : 'ახალი დაიჯესტის დამატება' }}</h2>
     <div class="modal-header-actions">
       <!-- Minimize into the floating bubble (keeps the draft, persists it server-side) -->
-      <button class="modal-close" (click)="draftService.minimize()" title="ჩაკეცვა">
+      <button class="modal-close" (click)="draftService.minimize('digest')" title="ჩაკეცვა">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
       </button>
-      <button class="modal-close" (click)="draftService.closeAndDiscard()" title="დახურვა">
+      <button class="modal-close" (click)="draftService.discardDraft('digest')" title="დახურვა">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -313,8 +335,8 @@
     <div class="form-group">
       <label>ფოტო</label>
       <div class="photo-toggle">
-        <button type="button" class="photo-tab-btn" [class.active]="(draftService.digestPhotoMode$ | async) === 'url'" (click)="draftService.setPhotoMode('url')">URL</button>
-        <button type="button" class="photo-tab-btn" [class.active]="(draftService.digestPhotoMode$ | async) === 'upload'" (click)="draftService.setPhotoMode('upload')">ატვირთვა</button>
+        <button type="button" class="photo-tab-btn" [class.active]="(draftService.digestPhotoMode$ | async) === 'url'" (click)="draftService.setPhotoMode('digest', 'url')">URL</button>
+        <button type="button" class="photo-tab-btn" [class.active]="(draftService.digestPhotoMode$ | async) === 'upload'" (click)="draftService.setPhotoMode('digest', 'upload')">ატვირთვა</button>
       </div>
       <div *ngIf="(draftService.digestPhotoMode$ | async) === 'url'" class="photo-input-area">
         <input type="text" [(ngModel)]="draftService.formData.imageUrl" placeholder="https://example.com/image.jpg" class="form-input"/>
@@ -327,7 +349,7 @@
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
           <span>{{ draftService.uploadedFile ? draftService.uploadedFile.name : 'ფაილის არჩევა' }}</span>
-          <input type="file" accept="image/*" (change)="draftService.onFileChange($event)" style="display:none"/>
+          <input type="file" accept="image/*" (change)="draftService.onFileChange('digest', $event)" style="display:none"/>
         </label>
       </div>
     </div>
@@ -385,10 +407,140 @@
   </div>
 
   <div class="modal-footer">
-    <button class="btn-secondary" (click)="draftService.closeAndDiscard()">გაუქმება</button>
+    <button class="btn-secondary" (click)="draftService.discardDraft('digest')">გაუქმება</button>
     <button class="btn-primary" (click)="draftService.saveDigestEntry()">{{ (draftService.isEditMode$ | async) ? 'შენახვა' : 'დამატება' }}</button>
   </div>
 </div>
+
+<!-- Vacancy create/edit modal - wired to DraftService exactly like digest,
+     but binds to the generic `state$('vacancy')`/`getFormData('vacancy')` API
+     directly instead of digest-style named passthrough properties. -->
+<ng-container *ngIf="showHeader && isAuthenticated && (draftService.state$('vacancy') | async) as vacancyState">
+  <div class="modal-backdrop" *ngIf="vacancyState.modalOpen" (click)="draftService.discardDraft('vacancy')"></div>
+  <div class="modal" *ngIf="vacancyState.modalOpen">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ vacancyState.editMode ? 'ვაკანსიის რედაქტირება' : 'ახალი ვაკანსია' }}</h2>
+      <div class="modal-header-actions">
+        <!-- Minimize into the floating bubble (keeps the draft, persists it server-side) -->
+        <button class="modal-close" (click)="draftService.minimize('vacancy')" title="ჩაკეცვა">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <button class="modal-close" (click)="draftService.discardDraft('vacancy')" title="დახურვა">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="vacancyTitle">სათაური</label>
+        <input type="text" id="vacancyTitle" [(ngModel)]="vacancyState.formData['title']" placeholder="ვაკანსიის სათაური" class="form-input"/>
+      </div>
+
+      <div class="form-group">
+        <label for="vacancyCategory">კატეგორია</label>
+        <select id="vacancyCategory" [(ngModel)]="vacancyState.formData['category']" class="form-select">
+          <option value="">აირჩიეთ კატეგორია</option>
+          <option *ngFor="let cat of vacancyCategories" [value]="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="vacancyDepartment">დეპარტამენტი</label>
+          <input type="text" id="vacancyDepartment" [(ngModel)]="vacancyState.formData['department']" placeholder="მაგ: IT დეპარტამენტი" class="form-input"/>
+        </div>
+        <div class="form-group">
+          <label for="vacancyLocation">ლოკაცია</label>
+          <input type="text" id="vacancyLocation" [(ngModel)]="vacancyState.formData['location']" placeholder="მაგ: თბილისი" class="form-input"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="vacancyDescription">აღწერა</label>
+        <textarea id="vacancyDescription" [(ngModel)]="vacancyState.formData['description']" placeholder="ვაკანსიის აღწერა..." class="form-textarea" rows="4"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="vacancyPosition"># პოზიცია</label>
+          <input type="text" id="vacancyPosition" value="" placeholder="ავტომატური" class="form-input" disabled/>
+        </div>
+        <div class="form-group">
+          <label for="vacancyDeadline">ვადა</label>
+          <input type="datetime-local" id="vacancyDeadline" [(ngModel)]="vacancyState.formData['deadline']" [min]="minDeadlineDate" class="form-input"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="toggle-group">
+          <div class="toggle-label-section">
+            <div class="toggle-label">აქტიური ვაკანსია</div>
+            <div class="toggle-description">გამოუქვეყნებელი ვაკანსია საიტზე არ გამოჩნდება</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" [(ngModel)]="vacancyState.formData['isActive']"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="draftService.discardDraft('vacancy')">გაუქმება</button>
+      <button class="btn-primary" (click)="draftService.saveVacancyEntry()">{{ vacancyState.editMode ? 'შენახვა' : 'დამატება' }}</button>
+    </div>
+  </div>
+</ng-container>
+
+<!-- News create/edit modal - same generic-API wiring pattern as the vacancy modal above. -->
+<ng-container *ngIf="showHeader && isAuthenticated && (draftService.state$('news') | async) as newsState">
+  <div class="modal-backdrop" *ngIf="newsState.modalOpen" (click)="draftService.discardDraft('news')"></div>
+  <div class="modal" *ngIf="newsState.modalOpen">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ newsState.editMode ? 'სიახლის რედაქტირება' : 'სიახლის დამატება' }}</h2>
+      <div class="modal-header-actions">
+        <!-- Minimize into the floating bubble (keeps the draft, persists it server-side) -->
+        <button class="modal-close" (click)="draftService.minimize('news')" title="ჩაკეცვა">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+        <button class="modal-close" (click)="draftService.discardDraft('news')" title="დახურვა">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="newsTitle">სათაური</label>
+        <input type="text" id="newsTitle" [(ngModel)]="newsState.formData['title']" placeholder="შეიყვანეთ სიახლის სათაური" class="form-input"/>
+      </div>
+      <div class="form-group">
+        <label for="newsContent">შინაარსი</label>
+        <textarea id="newsContent" [(ngModel)]="newsState.formData['content']" placeholder="შეიყვანეთ სიახლის ტექსტი" class="form-textarea" rows="5"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="newsImageUrl">სურათის URL (არასავალდებულო)</label>
+        <input type="text" id="newsImageUrl" [(ngModel)]="newsState.formData['imageUrl']" placeholder="https://example.com/image.jpg" class="form-input"/>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="draftService.discardDraft('news')">გაუქმება</button>
+      <button class="btn-primary" (click)="draftService.saveNewsEntry()">{{ newsState.editMode ? 'შენახვა' : 'დამატება' }}</button>
+    </div>
+  </div>
+</ng-container>
 
 <!-- ─── Toast notifications ──────────────────────────────────────────── -->
 <div class="toast-container" *ngIf="(toastService.toasts$ | async)?.length">

@@ -111,11 +111,12 @@
   background: hsl(221.2, 83.2%, 53.3%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.1s;
+  line-height: 1;
 }
 
 .btn-primary svg {
@@ -125,6 +126,10 @@
 
 .btn-primary:hover {
   background: hsl(221.2, 83.2%, 48%);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
 }
 
 /* .btn-secondary lives in shared.css */
@@ -235,6 +240,8 @@
 /* Modal - base styles (modal-backdrop, modal, modal-header, modal-title, */
 /* modal-close, modal-body, modal-footer) live in shared.css             */
 
+/* .form-select base styles live in shared.css */
+
 .form-select {
   width: 100%;
   padding: 10px 12px;
@@ -296,15 +303,8 @@
 
 /* .form-textarea and .form-row live in shared.css */
 
-/* Vacancy category badges */
-.category-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-}
+/* Vacancy category badges — base .category-badge style in shared.css.
+   Only the color variants remain here. */
 
 .category-open {
   background: hsl(210, 40%, 96%);
@@ -321,14 +321,8 @@
   color: hsl(142.1, 70.6%, 45.3%);
 }
 
-/* Vacancy status badges */
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-}
+/* Vacancy status badges — base .status-badge style in shared.css.
+   Only the color variants remain here. */
 
 .status-active {
   background: hsl(142.1, 76.2%, 95%);

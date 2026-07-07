@@ -19,7 +19,7 @@ namespace TaskHub.API.Data
         public DbSet<News> News { get; set; }
         public DbSet<Vacancy> Vacancies { get; set; }
         public DbSet<DigestEntry> DigestEntries { get; set; }
-        public DbSet<DigestDraft> DigestDrafts { get; set; }
+        public DbSet<Draft> Drafts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -86,16 +86,19 @@ namespace TaskHub.API.Data
                 .HasForeignKey(v => v.AuthorID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // DigestDraft: one draft per user enforced by a unique index on UserID.
-            // This is a standalone table and does not affect DigestEntries.
-            modelBuilder.Entity<DigestDraft>()
-                .HasIndex(d => d.UserID)
+            // Draft: one draft per (user, module) enforced by a unique composite
+            // index, so a user can have at most one minimized draft per module
+            // (e.g. digest) while independently having one for another module
+            // (e.g. vacancy) at the same time. Standalone table - does not
+            // affect the actual DigestEntries/Vacancies/News tables.
+            modelBuilder.Entity<Draft>()
+                .HasIndex(d => new { d.UserId, d.ModuleType })
                 .IsUnique();
 
-            modelBuilder.Entity<DigestDraft>()
+            modelBuilder.Entity<Draft>()
                 .HasOne(d => d.User)
                 .WithMany()
-                .HasForeignKey(d => d.UserID)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Seed data
