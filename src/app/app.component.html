@@ -264,9 +264,12 @@
      modules combined (digest/vacancy/news), showing a count badge, that
      expands into a small list of every currently-minimized draft. Fully
      generic over `draftService.minimizedDrafts$` - no module-specific
-     markup here, so adding a new draftable module needs no template changes. -->
+     markup here, so adding a new draftable module needs no template changes.
+     Hidden while any draft's modal is actually open (`openModuleType`) since
+     that modal is what you're currently working in - it reappears as soon as
+     that modal is minimized (back into the list) or discarded/closed. -->
 <ng-container *ngIf="showHeader && isAuthenticated && (draftService.minimizedDrafts$ | async) as minimizedDrafts">
-  <div class="draft-bubble-wrapper" *ngIf="minimizedDrafts.length > 0">
+  <div class="draft-bubble-wrapper" *ngIf="minimizedDrafts.length > 0 && !draftService.openModuleType">
     <!-- Expanded list, anchored above the bubble. -->
     <div class="draft-panel" *ngIf="draftBubbleExpanded">
       <div class="draft-panel-header">ჩაკეცილი დრაფტები</div>
